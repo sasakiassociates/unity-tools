@@ -1,0 +1,57 @@
+﻿#pragma kernel PixelFinderInitialize
+#pragma kernel PixelFinderMain
+
+int InputTextureSize;
+int InputTextureHeight;
+Texture2D<float4> InputTexture;
+
+int ColorArraySize;
+Texture2D<float4> ColorArrayTexture;
+
+static const uint maxVal = 16384;
+
+struct pixelStruct
+{
+    uint count;
+};
+
+RWStructuredBuffer<pixelStruct> PixelCountBuffer;
+
+[numthreads(64,1,1)]
+void PixelFinderInitialize(uint3 id : SV_DispatchThreadID)
+{
+    PixelCountBuffer[id.x].count = 0;
+}
+
+bool colorMatch(float4 c, float4 d)
+{
+    return abs(c.r - d.r) < 0.01 && abs(c.g - d.g) < 0.01 && abs(c.b - d.b) < 0.01;
+}
+
+
+float calcFrac(const float pos, const float r)
+{
+    const float px = 1 / (float)InputTextureSize;
+    const float theta = atan2(pos + px, r) - atan2(pos, r);
+    return theta * r / px;
+}
+
+
+[numthreads(8,8,1)]
+void PixelFinderMain(uint3 id : SV_DispatchThreadID)
+{
+    const float4 currentColor = InputTexture[id.xy];
+
+    for (int i = 0; i < ColorArraySize; i++)
+    {
+        if (colorMatch(currentColor, ColorArrayTexture[uint2(i, 0)]))
+        {
+            const float fracX = calcFrac(id.x / (float)InputTextureSize - 0.5, 0.5);
+            const float fracY = calcFrac(id.y / (float)InputTextureSize - 0.5, 0.5);
+
+            const uint overall = floor(maxVal * pow(abs(fracX * fracY), sqrt(2)));
+
+            InterlockedAdd(PixelCountBuffer[i].count, overall);
+        }
+    }
+}

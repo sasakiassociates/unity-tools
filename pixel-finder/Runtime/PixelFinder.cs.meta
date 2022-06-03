@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 71dd680f6b20495680a9827e11bb4c3a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _camera: {instanceID: 0}
+  - _colorStrip: {instanceID: 0}
+  - pixelShader: {fileID: 7200000, guid: 8e05f0da95362fa49914ca479a3d5800, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
