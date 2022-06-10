@@ -1,18 +1,19 @@
 {
-  "name": "Sasaki.PixelFinder",
-  "rootNamespace": "Sasaki.Unity",
-  "references": [
-    "Sasaki.Utilities",
-    "Unity.Burst",
-    "Unity.Mathematics"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "Sasaki.PixelFinder",
+    "rootNamespace": "Sasaki.Unity",
+    "references": [
+        "Sasaki.Utilities",
+        "UniTask",
+        "Unity.Burst",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
