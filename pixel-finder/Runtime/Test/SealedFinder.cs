@@ -1,26 +1,30 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace Sasaki.Unity
 {
-	public abstract class APixelFinder : MonoBehaviour, IPixelFinder
+	public sealed class SealedFinder : MonoBehaviour
 	{
 		[SerializeField] Texture2D _colorStrip;
 		[SerializeField] Camera _camera;
 
 		[SerializeField] [Range(1, 16)]
-		protected int _depthBuffer = 16;
+		int _depthBuffer = 16;
 
 		[SerializeField, HideInInspector]
-		protected int _index;
+		int _index;
 
 		(bool done, bool ready, bool running) _is;
 
 		(int color, int camera) _counts;
 
+		ComputeBuffer _computeBuffer;
 		NativeArray<Color32> _buffer, _tempBuffer;
 
 		(RenderTexture main, RenderTexture temp) _rt;
@@ -121,10 +125,11 @@ namespace Sasaki.Unity
 		}
 
 		#region Unity Functions
-		protected virtual void OnEnable()
+		void Start()
 		{
 			SafeClean();
 
+			_computeBuffer = new ComputeBuffer(size * size, sizeof(uint));
 			_rt.main = new RenderTexture(size, size, _depthBuffer);
 			_rt.main.name = $"{gameObject.name}-CameraTexture-Main";
 
@@ -147,19 +152,21 @@ namespace Sasaki.Unity
 			                                       NativeArrayOptions.UninitializedMemory);
 		}
 
-		protected virtual void OnDestroy()
+		void OnDestroy()
 		{
 			SafeClean();
 		}
 
-		protected virtual void OnDisable()
+		void OnDisable()
 		{
 			SafeClean();
 		}
 
-		protected virtual void SafeClean()
+		void SafeClean()
 		{
 			AsyncGPUReadback.WaitAllRequests();
+
+			_computeBuffer?.Dispose();
 
 			if (_rt.main != null) _rt.main.Release();
 			if (_rt.temp != null) _rt.temp.Release();
@@ -174,7 +181,7 @@ namespace Sasaki.Unity
 			Init(new[] { color }, collectionSize);
 		}
 
-		public virtual void Init(Color32[] colors, int collectionSize = 1, int cameraTotal = 6)
+		public void Init(Color32[] colors, int collectionSize = 1, int cameraTotal = 6)
 		{
 			if (colors == null || !colors.Any())
 			{
@@ -202,18 +209,11 @@ namespace Sasaki.Unity
 			flags = CameraClearFlags.Color;
 		}
 
-		/// <summary>
-		/// Render the camera and store the data into the container
-		/// </summary>
-		/// <param name="dataIndex">The index of where this data should be stored, Defaults to 0</param>
 		public IEnumerator Run(int dataIndex = 0)
 		{
 			_index = dataIndex;
-
-			// NOTE: Important to wait for end of frame to get a fresh view
 			yield return new WaitForEndOfFrame();
 
-			// NOTE: The async callback will dispose of all collections when using StartCoroutine. 
 			Render();
 		}
 
@@ -222,11 +222,7 @@ namespace Sasaki.Unity
 		/// </summary>
 		void Render()
 		{
-			_tempBuffer.Dispose();
-
-			_tempBuffer = new NativeArray<Color32>(size * size,
-			                                       Allocator.Persistent,
-			                                       NativeArrayOptions.UninitializedMemory);
+			// yield return new WaitForEndOfFrame();
 
 			Graphics.Blit(_rt.main, _rt.temp);
 
@@ -234,6 +230,18 @@ namespace Sasaki.Unity
 				(ref _buffer, _rt.temp, 0, OnCompleteReadback);
 		}
 
-		protected abstract void OnCompleteReadback(AsyncGPUReadbackRequest request);
+		void OnCompleteReadback(AsyncGPUReadbackRequest request)
+		{
+			if (request.hasError) throw new Exception("AsyncGPUReadback.RequestIntoNativeArray");
+
+			// _buffer.Dispose();
+			_tempBuffer.Dispose();
+
+			_tempBuffer = new NativeArray<Color32>(request.GetData<Color32>(), Allocator.Persistent);
+
+			Debug.Log(_buffer.Length);
+			
+		}
 	}
+
 }
