@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Sasaki.Unity
 {
@@ -82,7 +78,6 @@ namespace Sasaki.Unity
 					system.RunSync();
 					break;
 				case SystemType.Update:
-					system.RunOnPost();
 					break;
 			}
 		}

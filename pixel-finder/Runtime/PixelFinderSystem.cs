@@ -12,7 +12,7 @@ namespace Sasaki.Unity
 	public abstract class PixelFinderSystem : MonoBehaviour
 	{
 		[SerializeField, HideInInspector]
-		List<PixelFinder> _finders;
+		List<PixelFinderGPU> _finders;
 
 		[SerializeField, HideInInspector]
 		Vector3[] _points;
@@ -33,7 +33,7 @@ namespace Sasaki.Unity
 				for (int i = _finders.Count - 1; i >= 0; i--)
 					Destroy(_finders[i].gameObject);
 
-			_finders = new List<PixelFinder>(typeCount);
+			_finders = new List<PixelFinderGPU>(typeCount);
 		}
 
 		public void Create(Vector3[] systemPoints, Color32 color)
@@ -48,7 +48,7 @@ namespace Sasaki.Unity
 			_points = systemPoints;
 			_isFirst = true;
 
-			var prefab = new GameObject().AddComponent<PixelFinder>();
+			var prefab = new GameObject().AddComponent<PixelFinderGPU>();
 
 			foreach (var s in finderSetups)
 			{
@@ -100,7 +100,7 @@ namespace Sasaki.Unity
 			for (_index = startingIndex; _index < _points.Length; _index++)
 			{
 				foreach (var finder in _finders)
-					finder.Store(_index);
+					finder.Run(_index).ToUniTask(this);
 
 				Task.Yield();
 			}
@@ -127,8 +127,8 @@ namespace Sasaki.Unity
 			while (_index < _points.Length)
 			{
 				foreach (var finder in _finders)
-					finder.RenderAndStore(_index);
-			
+					yield return StartCoroutine(finder.Run(_index));
+
 				_index++;
 				yield return null;
 			}
@@ -152,7 +152,7 @@ namespace Sasaki.Unity
 			for (_index = startingIndex; _index < _points.Length; _index++)
 			{
 				foreach (var finder in _finders)
-					finder.RenderAndStore(_index);
+					StartCoroutine(finder.Run(_index));
 			}
 
 			OnSystemDataComplete?.Invoke(new FinderSystemDataContainer(_finders));
@@ -184,37 +184,10 @@ namespace Sasaki.Unity
 			get
 			{
 				foreach (var f in _finders)
-					if (!f.isDone)
+					if (!f.isRunning)
 						return false;
 
 				return true;
-			}
-		}
-		public void RunOnPost()
-		{
-			var t0 = getStartTime();
-
-			foreach (var finder in _finders)
-			{
-				finder.OnIndexDone += i =>
-				{
-					if (i < points.Length - 1)
-						finder.RunOnPost(++i);
-
-					else
-					{
-						finder.isRunning = false;
-						if (allDone)
-						{
-							Debug.Log("All done!");
-							isRunning = false;
-							OnSystemDataComplete?.Invoke(new FinderSystemDataContainer(_finders));
-							getEndTime(ref t0);
-						}
-					}
-				};
-
-				finder.RunOnPost(0);
 			}
 		}
 	}

@@ -14,50 +14,33 @@ namespace Sasaki.Unity
 	public class PixelFinderGPUCallback : APixelFinder
 	{
 
-		NativeArray<Color32> _buffer;
-		// (RenderTexture grab, RenderTexture flip, RenderTexture cam) _rt;
-		// // (RenderTexture grab, RenderTexture flip) _rt;
+		// NativeArray<Color32> _buffer;
+		// // (RenderTexture grab, RenderTexture flip, RenderTexture cam) _rt;
+		// // // (RenderTexture grab, RenderTexture flip) _rt;
+		// //
 		//
-		// void Awake()
+		// RenderTexture main;
+		//
+		// public IEnumerator Run()
 		// {
 		// 	_buffer = new NativeArray<Color32>(size * size,
 		// 	                                   Allocator.Persistent,
 		// 	                                   NativeArrayOptions.UninitializedMemory);
+		//
+		// 	main = new RenderTexture(size, size, 0);
+		//
+		// 	yield return new WaitForEndOfFrame();
+		//
+		// 	Graphics.Blit(texture, main);
+		//
+		// 	AsyncGPUReadback.RequestIntoNativeArray
+		// 		(ref _buffer, main, 0, OnCompleteReadback);
+		//
+		// 	Store();
 		// }
 
-		
-		RenderTexture main;
-		
-		public IEnumerator Run()
-		{
-			_buffer = new NativeArray<Color32>(size * size,
-			                                   Allocator.Persistent,
-			                                   NativeArrayOptions.UninitializedMemory);
-			
-			main = new RenderTexture(size, size, 0);
-			
-			yield return new WaitForEndOfFrame();
-				
-			Graphics.Blit(texture, main);
-			
-			AsyncGPUReadback.RequestIntoNativeArray
-				(ref _buffer, main, 0, OnCompleteReadback);
 
-			Store();
-			
-		}
-
-		public override void Render()
-		{
-			AsyncGPUReadback.RequestIntoNativeArray
-				(ref _buffer, texture, 0, OnCompleteReadback);
-		}
-		public override void Store()
-		{
-			Debug.Log("Store Called");
-		}
-
-		void OnCompleteReadback(AsyncGPUReadbackRequest request)
+		protected override void OnCompleteReadback(AsyncGPUReadbackRequest request)
 		{
 			if (request.hasError)
 			{
@@ -83,7 +66,6 @@ namespace Sasaki.Unity
 				Console.WriteLine(e);
 			}
 
-			
 			newTex.LoadRawTextureData(request.GetData<uint>());
 			newTex.Apply();
 
@@ -94,13 +76,7 @@ namespace Sasaki.Unity
 			Debug.Log("Request Complete");
 		}
 
-		protected override void SafeClean()
-		{
-			AsyncGPUReadback.WaitAllRequests();
-			base.SafeClean();
-			if (_buffer != default && _buffer.Any())
-				_buffer.Dispose();
-		}
+	
 
 	}
 }

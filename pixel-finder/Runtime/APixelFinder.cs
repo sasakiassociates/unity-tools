@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using Unity.Collections;
 using UnityEngine;
@@ -231,7 +232,14 @@ namespace Sasaki.Unity
 			Graphics.Blit(_rt.main, _rt.temp);
 
 			AsyncGPUReadback.RequestIntoNativeArray
-				(ref _buffer, _rt.temp, 0, OnCompleteReadback);
+			(ref _buffer, _rt.temp, 0, request =>
+			{
+				if (request.hasError) throw new Exception("AsyncGPUReadback.RequestIntoNativeArray");
+
+				_tempBuffer.Dispose();
+
+				_tempBuffer = new NativeArray<Color32>(request.GetData<Color32>(), Allocator.Persistent);
+			});
 		}
 
 		protected abstract void OnCompleteReadback(AsyncGPUReadbackRequest request);
