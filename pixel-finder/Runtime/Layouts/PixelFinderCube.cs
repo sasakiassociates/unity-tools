@@ -3,7 +3,7 @@
 namespace Sasaki.Unity
 {
 	
-	public class PixelFinderCube : APixelFinderSystem
+	public class PixelFinderCube : PixelFinderLayout
 	{
 		internal override IEnumerable<FinderDirection> finderSetups =>
 			new[]

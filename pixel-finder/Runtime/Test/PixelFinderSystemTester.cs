@@ -3,14 +3,13 @@ using UnityEngine;
 
 namespace Sasaki.Unity
 {
-
 	public class PixelFinderSystemTester : MonoBehaviour
 	{
 		[SerializeField] private int pointCount;
 
 		[SerializeField] GameObject frontObj, leftObj, rightObj, backObj;
-		
-		public APixelFinderSystem system;
+
+		public PixelFinderLayout layout;
 
 		Vector3[] points;
 
@@ -32,7 +31,6 @@ namespace Sasaki.Unity
 		{
 			if (GUI.Button(new Rect(10, 10, 50, 15), "Run"))
 				Run();
-			
 		}
 
 		public void Run()
@@ -42,11 +40,11 @@ namespace Sasaki.Unity
 			for (int i = 0; i < pointCount; i++)
 				points[i] = transform.position;
 
-			system.Init(points, colors);
+			layout.Init(points.Length, colors);
 
-			system.onSystemRunComplete += arg0 => Debug.Log("Reporting back");
-			
-			system.Run();
+			layout.onComplete += () => Debug.Log("Reporting back");
+
+			layout.Run();
 		}
 
 	}

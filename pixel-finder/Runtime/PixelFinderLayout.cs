@@ -6,29 +6,16 @@ using UnityEngine.Events;
 
 namespace Sasaki.Unity
 {
-	public abstract class APixelFinderSystem : MonoBehaviour
+	public abstract class PixelFinderLayout : MonoBehaviour
 	{
 		[SerializeField, HideInInspector]
 		List<PixelFinder> _finders;
-
-		[SerializeField, HideInInspector]
-		Vector3[] _points;
-
-		[SerializeField, HideInInspector]
-		int _index;
 
 		public int typeCount
 		{
 			get => finderSetups.Count();
 		}
-
-		public Vector3[] points
-		{
-			get => _points;
-		}
-
-		public bool isRunning { get; protected set; }
-
+		
 		public void Clear()
 		{
 			if (_finders != null && _finders.Any())
@@ -38,40 +25,27 @@ namespace Sasaki.Unity
 			_finders = new List<PixelFinder>(typeCount);
 		}
 
-		void MoveAndRender()
+		public FinderLayoutDataContainer data
 		{
-			// step move forward
-			transform.position = points[_index];
-			foreach (var finder in _finders)
-				StartCoroutine(finder.Run(_index));
+			get => new FinderLayoutDataContainer(_finders);
 		}
 
-		protected virtual void CheckFindersInSystem()
+		protected virtual void CheckFindersInLayout()
 		{
 			if (allDone)
 			{
-				_index++;
-
-				if (_index >= points.Length)
-				{
-					isRunning = false;
-					onSystemRunComplete?.Invoke(new FinderSystemDataContainer(_finders));
-				}
-				else
-					MoveAndRender();
+				onComplete?.Invoke();
 			}
 		}
 
-		public void Init(Vector3[] systemPoints, Color32 color)
+		public void Init(int pointCount, Color32 color)
 		{
-			Init(systemPoints, new[] { color });
+			Init(pointCount, new[] { color });
 		}
 
-		public void Init(Vector3[] systemPoints, Color32[] colors)
+		public void Init(int pointCount, Color32[] colors)
 		{
 			Clear();
-
-			_points = systemPoints;
 
 			var prefab = new GameObject().AddComponent<PixelFinder>();
 
@@ -91,36 +65,26 @@ namespace Sasaki.Unity
 					_ => new Vector3(0, 0, 0)
 				});
 
-				finder.Init(colors, CheckFindersInSystem, _points.Length, typeCount);
+				finder.Init(colors, CheckFindersInLayout, pointCount, typeCount);
 				_finders.Add(finder);
 			}
 
 			Destroy(prefab.gameObject);
 		}
 
-		public void Run(int startingIndex = 0)
+		public void Run(int index = 0)
 		{
-			_index = startingIndex;
-			MoveAndRender();
+			foreach (var finder in _finders)
+				StartCoroutine(finder.Run(index));
 		}
 
 		internal abstract IEnumerable<FinderDirection> finderSetups { get; }
 
 		#region Events
-		public event UnityAction<FinderSystemDataContainer> onSystemRunComplete;
+		public event UnityAction onComplete;
 		#endregion
 
-		internal enum FinderDirection
-		{
-			Front,
-			Left,
-			Back,
-			Right,
-			Up,
-			Down,
-		}
-
-		private bool allDone
+		public bool allDone
 		{
 			get
 			{

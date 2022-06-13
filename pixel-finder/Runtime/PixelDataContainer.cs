@@ -17,9 +17,10 @@ namespace Sasaki.Unity
 		}
 	}
 
-	public readonly struct FinderSystemDataContainer
+
+	public readonly struct FinderLayoutDataContainer
 	{
-		public FinderSystemDataContainer(List<PixelFinder> finders)
+		public FinderLayoutDataContainer(List<PixelFinder> finders)
 		{
 			data = new Dictionary<string, PixelDataContainer>();
 
@@ -27,8 +28,22 @@ namespace Sasaki.Unity
 				data.Add(f.name, f.data);
 		}
 		
-
 		public readonly Dictionary<string, PixelDataContainer> data;
+
 	}
+	
+	public readonly struct FinderSystemDataContainer
+	{
+		public FinderSystemDataContainer(List<PixelFinderLayout> finders)
+		{
+			data = new Dictionary<string, FinderLayoutDataContainer>();
+
+			foreach (var f in finders)
+				data.Add(f.name, f.data);
+		}
+		
+		public readonly Dictionary<string, FinderLayoutDataContainer> data;
+	}
+	
 
 }
