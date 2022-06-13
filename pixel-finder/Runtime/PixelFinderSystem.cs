@@ -41,6 +41,8 @@ namespace Sasaki.Unity
 			Create(systemPoints, new[] { color });
 		}
 
+		private void Check()
+		{ }
 		public void Create(Vector3[] systemPoints, Color32[] colors)
 		{
 			Clear();
@@ -66,7 +68,7 @@ namespace Sasaki.Unity
 					_ => new Vector3(0, 0, 0)
 				});
 
-				finder.Init(colors, _points.Length, typeCount);
+				finder.Init(colors, Check, _points.Length, typeCount);
 
 				_finders.Add(finder);
 			}

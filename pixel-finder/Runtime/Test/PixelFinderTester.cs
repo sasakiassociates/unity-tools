@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Timers;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Sasaki.Unity
 {
@@ -17,7 +20,6 @@ namespace Sasaki.Unity
 
 		List<PixelFinderGPU> pixelFinder;
 		List<PixelFinderJob> pixelFinderJobs;
-		[SerializeField] SealedFinder _sealedFinder;
 
 		float m_UpdateTime = -1;
 
@@ -30,46 +32,70 @@ namespace Sasaki.Unity
 		{
 			Test_UseSeparateColorsForEachShader();
 			Test_UseBurst();
-			_sealedFinder.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
 		}
 
+		Stopwatch timer;
 		void Do()
 		{
-			var t0 = Time.realtimeSinceStartup;
+			timer = new Stopwatch();
+			timer.Start();
 
-			switch (systemType)
+			if (systemType == FinderSystemType.ComputeShader)
+				foreach (var finder in pixelFinder)
+					StartCoroutine(finder.Run());
+			
+			else if (systemType is FinderSystemType.BurstParallel or FinderSystemType.Burst)
 			{
-				case FinderSystemType.ComputeShader:
-					foreach (var finder in pixelFinder)
-						StartCoroutine(finder.Run());
-					break;
-				case FinderSystemType.Burst:
-					foreach (var j in pixelFinderJobs)
-						j.RenderBurst();
-					break;
-				case FinderSystemType.BurstParallel:
-					foreach (var j in pixelFinderJobs)
-						j.RenderBurstParallel();
-					break;
-				case FinderSystemType.GPU:
-					StartCoroutine(_sealedFinder.Run());
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				foreach (var finder in pixelFinderJobs)
+				{
+					finder.usePar = systemType == FinderSystemType.BurstParallel;
+					StartCoroutine(finder.Run());
+				}
 			}
 
-			var t1 = Time.realtimeSinceStartup;
-			var dt = t1 - t0;
 
-			m_UpdateTime = m_UpdateTime < 0 ? dt : Mathf.Lerp(m_UpdateTime, dt, 0.3f);
-
-			Debug.Log($"Complete {systemType}: {m_UpdateTime * 1000.0f:F2}ms");
 		}
 
 		void OnGUI()
 		{
 			if (GUI.Button(new Rect(10, 10, 50, 15), "Run"))
 				Do();
+		}
+
+		private void Check()
+		{
+			if (systemType == FinderSystemType.ComputeShader)
+			{
+				foreach (var finder in pixelFinder)
+				{
+					if (!finder.isDone)
+					{
+						Debug.Log($"{finder.name} is not done");
+						return;
+					}
+				}
+				
+				foreach (var finder in pixelFinder)
+					Debug.Log(finder.data.Data[0][0]);
+			}
+			else if (systemType is FinderSystemType.BurstParallel or FinderSystemType.Burst)
+			{
+				foreach (var finder in pixelFinderJobs)
+				{
+					if (!finder.isDone)
+					{
+						Debug.Log($"{finder.name} is not done");
+						return;
+ 					}
+				}
+
+				foreach (var finder in pixelFinderJobs)
+					Debug.Log(finder.data.Data[0][0]);
+			}
+			
+			timer.Stop();
+
+			Debug.Log($"Complete {systemType}: {timer.Elapsed}");
 		}
 
 		void Test_UseBurst()
@@ -80,28 +106,28 @@ namespace Sasaki.Unity
 			front.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, 0));
 			front.transform.SetParent(parent.transform);
 
-			front.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			front.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			frontImageJob.texture = front.texture;
 
 			var left = new GameObject("Left-PixelFinderJob").AddComponent<PixelFinderJob>();
 			left.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
 			left.transform.SetParent(parent.transform);
 
-			left.Init(leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			left.Init(leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			leftImageJob.texture = left.texture;
 
 			var right = new GameObject("Right-PixelFinderJob").AddComponent<PixelFinderJob>();
 			right.transform.localRotation = Quaternion.Euler(new Vector3(0, -90, 0));
 			right.transform.SetParent(parent.transform);
 
-			right.Init(rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			right.Init(rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			rightImageJob.texture = right.texture;
 
 			var back = new GameObject("Back-PixelFinderJob").AddComponent<PixelFinderJob>();
 			back.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
 			back.transform.SetParent(parent.transform);
 
-			back.Init(backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			back.Init(backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			backImageJob.texture = back.texture;
 
 			pixelFinderJobs = new List<PixelFinderJob>()
@@ -118,28 +144,28 @@ namespace Sasaki.Unity
 			front.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, 0));
 			front.transform.SetParent(parent.transform);
 
-			front.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			front.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			frontImage.texture = front.texture;
 
 			var left = new GameObject("Left-PixelFinder").AddComponent<PixelFinderGPU>();
 			left.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
 			left.transform.SetParent(parent.transform);
 
-			left.Init(leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			left.Init(leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			leftImage.texture = left.texture;
 
 			var right = new GameObject("Right-PixelFinder").AddComponent<PixelFinderGPU>();
 			right.transform.localRotation = Quaternion.Euler(new Vector3(0, -90, 0));
 			right.transform.SetParent(parent.transform);
 
-			right.Init(rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			right.Init(rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			rightImage.texture = right.texture;
 
 			var back = new GameObject("Back-PixelFinder").AddComponent<PixelFinderGPU>();
 			back.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
 			back.transform.SetParent(parent.transform);
 
-			back.Init(backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor));
+			back.Init(backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			backImage.texture = back.texture;
 
 			pixelFinder = new List<PixelFinderGPU>

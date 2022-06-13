@@ -1014,6 +1014,7 @@ MonoBehaviour:
   _camera: {fileID: 933097769}
   _depthBuffer: 16
   _index: 0
+  _colors: []
 --- !u!1 &1238986619
 GameObject:
   m_ObjectHideFlags: 0
@@ -1031,7 +1032,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!20 &1238986620
 Camera:
   m_ObjectHideFlags: 0
@@ -1281,7 +1282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66ceae0ee951489b95e29165f97e4fd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  systemType: 3
+  systemType: 1
   frontObj: {fileID: 12582231}
   leftObj: {fileID: 157635472}
   rightObj: {fileID: 899186772}

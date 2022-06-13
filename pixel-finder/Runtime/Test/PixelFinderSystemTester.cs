@@ -52,6 +52,10 @@ namespace Sasaki.Unity
 			}
 		}
 
+		void Check()
+		{ }
+		
+		
 		public async UniTaskVoid Run()
 		{
 			Debug.Log($"Starting System Test with {systemType}");
@@ -61,8 +65,7 @@ namespace Sasaki.Unity
 				points[i] = transform.position;
 
 			system.Create(points, colors);
-			_gpuCallback.Init(colors, points.Length);
-
+			_gpuCallback.Init(colors, Check, points.Length);
 
 			system.OnSystemDataComplete += arg0 => Debug.Log("Reporting back");
 

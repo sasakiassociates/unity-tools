@@ -18,6 +18,9 @@ namespace Sasaki.Unity
 		[SerializeField, HideInInspector]
 		protected int _index;
 
+		[SerializeField, HideInInspector]
+		Color32[] _colors;
+
 		(bool done, bool ready, bool running) _is;
 
 		(int color, int camera) _counts;
@@ -27,6 +30,24 @@ namespace Sasaki.Unity
 		(RenderTexture main, RenderTexture temp) _rt;
 
 		public PixelDataContainer data { get; protected set; }
+
+		public Color32[] colors
+		{
+			get => _colors;
+			private set
+			{
+				if (value == null || !value.Any())
+				{
+					Debug.LogWarning("No Active Colors Ready");
+					return;
+				}
+
+				_colors = value;
+				_counts.color = colors.Length;
+
+				colorStrip = colors.DrawPixelLine();
+			}
+		}
 
 		public bool isRunning
 		{
@@ -52,10 +73,17 @@ namespace Sasaki.Unity
 			protected set => _counts.camera = value;
 		}
 
+		/// <summary>
+		/// Reports the total collection size 
+		/// </summary>
+		public int collectionCount
+		{
+			get => data.Data?.Length ?? 0;
+		}
+
 		public int colorCount
 		{
-			get => _counts.color;
-			protected set => _counts.color = value;
+			get => _colors?.Length ?? 0;
 		}
 
 		public Texture2D colorStrip
@@ -170,29 +198,26 @@ namespace Sasaki.Unity
 		}
 		#endregion
 
-		public void Init(Color32 color, int collectionSize = 1, int cameraTotal = 6)
+		public void Init(Color32 color, Action onDone, int collectionSize = 1, int cameraTotal = 6)
 		{
-			Init(new[] { color }, collectionSize);
+			Init(new[] { color }, onDone, collectionSize);
 		}
 
-		public virtual void Init(Color32[] colors, int collectionSize = 1, int cameraTotal = 6)
-		{
-			if (colors == null || !colors.Any())
-			{
-				Debug.LogWarning("No Active Colors Ready");
-				return;
-			}
+		public const uint MAX_VALUE = 16384;
+		public const uint MAX_PIXELS_IN_VIEW = 2223114636;
 
-			colorStrip = colors.DrawPixelLine();
-			_counts.color = colors.Length;
+		Action OnDone;
+
+		public virtual void Init(Color32[] inputColors, Action onDone, int collectionSize = 1, int cameraTotal = 6)
+		{
+			// draws the texture needed for analysis
+			colors = inputColors;
 
 			if (colorStrip == null)
 			{
 				Debug.LogError("Texture did not set");
 				return;
 			}
-
-			data = new PixelDataContainer(collectionSize);
 
 			_counts.camera = cameraTotal;
 
@@ -201,6 +226,10 @@ namespace Sasaki.Unity
 			maxClipping = 10000;
 			background = new Color32(0, 0, 0, 255);
 			flags = CameraClearFlags.Color;
+
+			data = new PixelDataContainer(collectionSize);
+
+			OnDone = onDone;
 		}
 
 		/// <summary>
@@ -210,12 +239,15 @@ namespace Sasaki.Unity
 		public IEnumerator Run(int dataIndex = 0)
 		{
 			_index = dataIndex;
+			isDone = false;
 
 			// NOTE: Important to wait for end of frame to get a fresh view
 			yield return new WaitForEndOfFrame();
 
 			// NOTE: The async callback will dispose of all collections when using StartCoroutine. 
 			Render();
+
+			yield return new WaitUntil(() => isDone);
 		}
 
 		/// <summary>
@@ -223,12 +255,6 @@ namespace Sasaki.Unity
 		/// </summary>
 		void Render()
 		{
-			_tempBuffer.Dispose();
-
-			_tempBuffer = new NativeArray<Color32>(size * size,
-			                                       Allocator.Persistent,
-			                                       NativeArrayOptions.UninitializedMemory);
-
 			Graphics.Blit(_rt.main, _rt.temp);
 
 			AsyncGPUReadback.RequestIntoNativeArray
@@ -236,9 +262,12 @@ namespace Sasaki.Unity
 			{
 				if (request.hasError) throw new Exception("AsyncGPUReadback.RequestIntoNativeArray");
 
-				_tempBuffer.Dispose();
+				OnCompleteReadback(request);
+				isDone = true;
+				OnDone?.Invoke();
 
-				_tempBuffer = new NativeArray<Color32>(request.GetData<Color32>(), Allocator.Persistent);
+				// _tempBuffer.Dispose();
+				// _tempBuffer = new NativeArray<Color32>(request.GetData<Color32>(), Allocator.Persistent);
 			});
 		}
 

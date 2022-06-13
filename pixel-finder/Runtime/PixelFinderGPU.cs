@@ -19,9 +19,9 @@ namespace Sasaki.Unity
 
 		ComputeBuffer _histogramBuffer;
 
-		public override void Init(Color32[] colors, int collectionSize = 1, int cameraTotal = 6)
+		public override void Init(Color32[] inputColors, Action onDone, int collectionSize = 1, int cameraTotal = 6)
 		{
-			base.Init(colors, collectionSize, cameraTotal);
+			base.Init(inputColors, onDone, collectionSize, cameraTotal);
 
 			TryLoadShader();
 
@@ -36,9 +36,7 @@ namespace Sasaki.Unity
 
 		protected override void OnCompleteReadback(AsyncGPUReadbackRequest request)
 		{
-			
 			data.Set(Process(), _index);
-			
 		}
 
 		void SetKernels()
