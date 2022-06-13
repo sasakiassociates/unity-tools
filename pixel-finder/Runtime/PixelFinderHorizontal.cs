@@ -3,7 +3,7 @@
 namespace Sasaki.Unity
 {
 
-	public class PixelFinderHorizontal : PixelFinderSystem
+	public class PixelFinderHorizontal : APixelFinderSystem
 	{
 		internal override IEnumerable<FinderDirection> finderSetups =>
 			new[]

@@ -247,7 +247,7 @@ namespace Sasaki.Unity
 			// NOTE: The async callback will dispose of all collections when using StartCoroutine. 
 			Render();
 
-			yield return new WaitUntil(() => isDone);
+			yield return null;
 		}
 
 		/// <summary>
