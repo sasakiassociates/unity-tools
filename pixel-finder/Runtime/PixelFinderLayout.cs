@@ -15,7 +15,16 @@ namespace Sasaki.Unity
 		{
 			get => finderSetups.Count();
 		}
-		
+
+		public int cullingMasks
+		{
+			set
+			{
+				foreach (var finder in _finders)
+					finder.cam.cullingMask = value;
+			}
+		}
+
 		public void Clear()
 		{
 			if (_finders != null && _finders.Any())
@@ -25,6 +34,12 @@ namespace Sasaki.Unity
 			_finders = new List<PixelFinder>(typeCount);
 		}
 
+		public List<PixelFinder> finders
+		{
+			get => _finders;
+
+		}
+		
 		public FinderLayoutDataContainer data
 		{
 			get => new FinderLayoutDataContainer(_finders);
@@ -43,7 +58,7 @@ namespace Sasaki.Unity
 			Init(pointCount, new[] { color });
 		}
 
-		public void Init(int pointCount, Color32[] colors)
+		public virtual void Init(int pointCount, Color32[] colors)
 		{
 			Clear();
 
@@ -75,7 +90,7 @@ namespace Sasaki.Unity
 		public void Run(int index = 0)
 		{
 			foreach (var finder in _finders)
-				StartCoroutine(finder.Run(index));
+				StartCoroutine(finder.Render(index));
 		}
 
 		internal abstract IEnumerable<FinderDirection> finderSetups { get; }

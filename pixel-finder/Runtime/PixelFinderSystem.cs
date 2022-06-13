@@ -17,6 +17,12 @@ namespace Sasaki.Unity
 
 		public bool isRunning { get; protected set; }
 
+		public List<PixelFinderLayout> layouts
+		{
+			get => _layouts;
+			protected set => _layouts = value;
+		}
+
 		public Vector3[] points
 		{
 			get => _points;
@@ -39,7 +45,7 @@ namespace Sasaki.Unity
 				return true;
 			}
 		}
-		
+
 		public void Clear()
 		{
 			if (_layouts != null && _layouts.Any())
@@ -47,17 +53,17 @@ namespace Sasaki.Unity
 					Destroy(_layouts[i].gameObject);
 		}
 
-		public void Init(Vector3[] systemPoints, Color32 color, List<PixelFinderLayout> layouts = null)
+		public void Init(Vector3[] systemPoints, Color32 color, List<PixelFinderLayout> inputLayouts = null)
 		{
-			Init(systemPoints, new[] { color });
+			Init(systemPoints, new[] { color }, inputLayouts);
 		}
 
-		public virtual void Init(Vector3[] systemPoints, Color32[] colors, List<PixelFinderLayout> layouts = null)
+		public virtual void Init(Vector3[] systemPoints, Color32[] colors, List<PixelFinderLayout> inputLayouts = null)
 		{
-			if (layouts != null && layouts.Any())
+			if (inputLayouts != null && inputLayouts.Any())
 			{
 				Clear();
-				_layouts = layouts;
+				_layouts = inputLayouts;
 			}
 
 			_points = systemPoints;
@@ -66,7 +72,15 @@ namespace Sasaki.Unity
 			{
 				layout.Init(_points.Length, colors);
 				layout.onComplete += CheckFindersInSystem;
+				layout.transform.SetParent(transform);
 			}
+		}
+
+		protected virtual void StartRun(int startingIndex = 0)
+		{
+			isRunning = true;
+
+			Run(startingIndex);
 		}
 
 		public void Run(int startingIndex = 0)

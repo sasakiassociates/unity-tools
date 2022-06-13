@@ -26,7 +26,7 @@ namespace Sasaki.Unity
 		[SerializeField, HideInInspector]
 		Color32[] _colors;
 
-		(bool done, bool ready, bool running) _is;
+		(bool done, bool ready) _is;
 
 		(int color, int camera) _counts;
 
@@ -81,12 +81,6 @@ namespace Sasaki.Unity
 
 				colorStrip = colors.DrawPixelLine();
 			}
-		}
-
-		public bool isRunning
-		{
-			get => _is.running;
-			set => _is.running = value;
 		}
 
 		public bool isDone
@@ -168,6 +162,12 @@ namespace Sasaki.Unity
 			set => _camera.backgroundColor = value;
 		}
 
+		public float orthographicSize
+		{
+			get => cam.orthographicSize;
+			set => cam.orthographicSize = value;
+		}
+		
 		public Camera cam
 		{
 			get => _camera;
@@ -291,7 +291,7 @@ namespace Sasaki.Unity
 		/// Render the camera and store the data into the container
 		/// </summary>
 		/// <param name="dataIndex">The index of where this data should be stored, Defaults to 0</param>
-		public IEnumerator Run(int dataIndex = 0)
+		public IEnumerator Render(int dataIndex = 0)
 		{
 			_index = dataIndex;
 			isDone = false;
@@ -300,7 +300,7 @@ namespace Sasaki.Unity
 			yield return new WaitForEndOfFrame();
 
 			// NOTE: The async callback will dispose of all collections when using StartCoroutine. 
-			Render();
+			RenderAndCompile();
 
 			yield return null;
 		}
@@ -308,7 +308,7 @@ namespace Sasaki.Unity
 		/// <summary>
 		/// Render the camera and store the data into the container
 		/// </summary>
-		void Render()
+		void RenderAndCompile()
 		{
 			Graphics.Blit(_rt.main, _rt.temp);
 
