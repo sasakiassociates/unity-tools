@@ -28,6 +28,9 @@ namespace Sasaki.Unity
 		NativeArray<Color32> _buffer, _tempBuffer;
 
 		(RenderTexture main, RenderTexture temp) _rt;
+		
+		public const uint MAX_VALUE = 16384;
+		public const uint MAX_PIXELS_IN_VIEW = 2223114636;
 
 		public PixelDataContainer data { get; protected set; }
 
@@ -202,9 +205,6 @@ namespace Sasaki.Unity
 		{
 			Init(new[] { color }, onDone, collectionSize);
 		}
-
-		public const uint MAX_VALUE = 16384;
-		public const uint MAX_PIXELS_IN_VIEW = 2223114636;
 
 		Action OnDone;
 

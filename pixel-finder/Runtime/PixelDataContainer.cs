@@ -19,7 +19,7 @@ namespace Sasaki.Unity
 
 	public readonly struct FinderSystemDataContainer
 	{
-		public FinderSystemDataContainer(List<PixelFinderGPU> finders)
+		public FinderSystemDataContainer(List<PixelFinder> finders)
 		{
 			data = new Dictionary<string, PixelDataContainer>();
 

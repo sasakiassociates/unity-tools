@@ -9,11 +9,9 @@ namespace Sasaki.Unity
 {
 
 	[RequireComponent(typeof(Camera))]
-	public class PixelFinderGPU : APixelFinder
+	public class PixelFinder : APixelFinder
 	{
 		[SerializeField] uint[] histogramData;
-
-		[SerializeField] bool debugViewer;
 
 		[SerializeField] ComputeShader pixelShader;
 
@@ -23,24 +21,20 @@ namespace Sasaki.Unity
 		{
 			base.Init(inputColors, onDone, collectionSize, cameraTotal);
 
-			TryLoadShader();
+			if (pixelShader == null)
+			{
+				#if UNITY_EDITOR
+				pixelShader =
+					Instantiate(AssetDatabase.LoadAssetAtPath<ComputeShader>("Packages/com.sasaki.pixelfinder/Runtime/Shader/PixelFinder.compute"));
+				#endif
 
-			SetKernels();
-		}
+				if (pixelShader == null)
+				{
+					Debug.LogWarning("No Active Shader Found");
+					return;
+				}
+			}
 
-		protected override void SafeClean()
-		{
-			base.SafeClean();
-			_histogramBuffer?.Dispose();
-		}
-
-		protected override void OnCompleteReadback(AsyncGPUReadbackRequest request)
-		{
-			data.Set(Process(), _index);
-		}
-
-		void SetKernels()
-		{
 			CreateBuffers();
 
 			_kernInitialize = pixelShader.FindKernel(PixelFinderInit);
@@ -57,35 +51,13 @@ namespace Sasaki.Unity
 				isReady = true;
 		}
 
-		void CreateBuffers()
+		protected override void SafeClean()
 		{
+			base.SafeClean();
 			_histogramBuffer?.Dispose();
-
-			_histogramBuffer = new ComputeBuffer(colorCount, sizeof(uint));
-
-			histogramData = new uint[colorCount];
-
-			pixelShader.SetInt(ColorArraySize, colorCount);
 		}
 
-		void TryLoadShader()
-		{
-			if (pixelShader == null)
-			{
-				#if UNITY_EDITOR
-				pixelShader =
-					Instantiate(AssetDatabase.LoadAssetAtPath<ComputeShader>("Packages/com.sasaki.pixelfinder/Runtime/Shader/PixelFinder.compute"));
-				#endif
-
-				if (pixelShader == null)
-				{
-					Debug.LogWarning("No Active Shader Found");
-					return;
-				}
-			}
-		}
-
-		double[] Process()
+		protected override void OnCompleteReadback(AsyncGPUReadbackRequest request)
 		{
 			if (_histogramBuffer.count != colorCount)
 			{
@@ -105,17 +77,23 @@ namespace Sasaki.Unity
 			var res = new double[histogramData.Length];
 
 			for (var i = 0; i < histogramData.Length; i++)
-				res[i] = (double)histogramData[i] / PIXELS_IN_VIEW / cameraCount;
+				res[i] = (double)histogramData[i] / MAX_PIXELS_IN_VIEW / cameraCount;
 
-			return res;
+			data.Set(res, _index);
+		}
+
+		void CreateBuffers()
+		{
+			_histogramBuffer?.Dispose();
+
+			_histogramBuffer = new ComputeBuffer(colorCount, sizeof(uint));
+
+			histogramData = new uint[colorCount];
+
+			pixelShader.SetInt(ColorArraySize, colorCount);
 		}
 
 		//Old Value for Max 1395882500
-		/// <summary>
-		///   Max Pixel Count in a single viewer as measured :D
-		/// </summary>
-		/// 
-		public const uint PIXELS_IN_VIEW = 2223114636;
 
 		#region Shader Parameters
 		const string PixelFinderInit = "PixelFinderInitialize";

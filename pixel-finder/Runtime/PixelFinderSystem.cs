@@ -12,7 +12,7 @@ namespace Sasaki.Unity
 	public abstract class PixelFinderSystem : MonoBehaviour
 	{
 		[SerializeField, HideInInspector]
-		List<PixelFinderGPU> _finders;
+		List<PixelFinder> _finders;
 
 		[SerializeField, HideInInspector]
 		Vector3[] _points;
@@ -33,7 +33,7 @@ namespace Sasaki.Unity
 				for (int i = _finders.Count - 1; i >= 0; i--)
 					Destroy(_finders[i].gameObject);
 
-			_finders = new List<PixelFinderGPU>(typeCount);
+			_finders = new List<PixelFinder>(typeCount);
 		}
 
 		public void Create(Vector3[] systemPoints, Color32 color)
@@ -50,7 +50,7 @@ namespace Sasaki.Unity
 			_points = systemPoints;
 			_isFirst = true;
 
-			var prefab = new GameObject().AddComponent<PixelFinderGPU>();
+			var prefab = new GameObject().AddComponent<PixelFinder>();
 
 			foreach (var s in finderSetups)
 			{

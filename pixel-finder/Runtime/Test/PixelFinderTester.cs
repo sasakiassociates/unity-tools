@@ -18,7 +18,7 @@ namespace Sasaki.Unity
 		[SerializeField] RawImage frontImage, leftImage, rightImage, backImage;
 		[SerializeField] RawImage frontImageJob, leftImageJob, rightImageJob, backImageJob;
 
-		List<PixelFinderGPU> pixelFinder;
+		List<PixelFinder> pixelFinder;
 		List<PixelFinderJob> pixelFinderJobs;
 
 		float m_UpdateTime = -1;
@@ -140,35 +140,35 @@ namespace Sasaki.Unity
 		{
 			var parent = new GameObject("Shader");
 
-			var front = new GameObject("Front-PixelFinder").AddComponent<PixelFinderGPU>();
+			var front = new GameObject("Front-PixelFinder").AddComponent<PixelFinder>();
 			front.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, 0));
 			front.transform.SetParent(parent.transform);
 
 			front.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			frontImage.texture = front.texture;
 
-			var left = new GameObject("Left-PixelFinder").AddComponent<PixelFinderGPU>();
+			var left = new GameObject("Left-PixelFinder").AddComponent<PixelFinder>();
 			left.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
 			left.transform.SetParent(parent.transform);
 
 			left.Init(leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			leftImage.texture = left.texture;
 
-			var right = new GameObject("Right-PixelFinder").AddComponent<PixelFinderGPU>();
+			var right = new GameObject("Right-PixelFinder").AddComponent<PixelFinder>();
 			right.transform.localRotation = Quaternion.Euler(new Vector3(0, -90, 0));
 			right.transform.SetParent(parent.transform);
 
 			right.Init(rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			rightImage.texture = right.texture;
 
-			var back = new GameObject("Back-PixelFinder").AddComponent<PixelFinderGPU>();
+			var back = new GameObject("Back-PixelFinder").AddComponent<PixelFinder>();
 			back.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
 			back.transform.SetParent(parent.transform);
 
 			back.Init(backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
 			backImage.texture = back.texture;
 
-			pixelFinder = new List<PixelFinderGPU>
+			pixelFinder = new List<PixelFinder>
 			{
 				front, left, right, back
 			};
