@@ -2,10 +2,7 @@
     "name": "Sasaki.PixelFinder",
     "rootNamespace": "Sasaki.Unity",
     "references": [
-        "Sasaki.Utilities",
-        "UniTask",
-        "Unity.Burst",
-        "Unity.Mathematics"
+        "Sasaki.Utilities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
