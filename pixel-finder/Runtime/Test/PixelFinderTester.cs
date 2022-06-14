@@ -40,7 +40,7 @@ namespace Sasaki.Unity
 
 			if (systemType == FinderSystemType.ComputeShader)
 				foreach (var finder in pixelFinder)
-					StartCoroutine(finder.Run());
+					StartCoroutine(finder.Render());
 			
 		}
 
@@ -64,7 +64,7 @@ namespace Sasaki.Unity
 				}
 				
 				foreach (var finder in pixelFinder)
-					Debug.Log(finder.data.Data[0][0]);
+					Debug.Log(finder.data.data[0][0]);
 			}
 
 			timer.Stop();

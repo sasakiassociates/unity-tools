@@ -46,6 +46,7 @@ namespace Sasaki.Unity
 		//Old Value for Max 1395882500
 
 		#region Shader Parameters
+
 		const string PixelFinderInit = "PixelFinderInitialize";
 
 		const string PixelFinderMain = "PixelFinderMain";
@@ -61,6 +62,7 @@ namespace Sasaki.Unity
 		const string PixelCountBuffer = "PixelCountBuffer";
 
 		int _kernMain, _kernInitialize;
+
 		#endregion
 
 		public PixelDataContainer data { get; set; }
@@ -106,7 +108,7 @@ namespace Sasaki.Unity
 		/// </summary>
 		public int collectionCount
 		{
-			get => data.Data?.Length ?? 0;
+			get => data.data?.Length ?? 0;
 		}
 
 		public int colorCount
@@ -167,7 +169,7 @@ namespace Sasaki.Unity
 			get => cam.orthographicSize;
 			set => cam.orthographicSize = value;
 		}
-		
+
 		public Camera cam
 		{
 			get => _camera;
@@ -184,6 +186,7 @@ namespace Sasaki.Unity
 		}
 
 		#region Unity Functions
+
 		void OnEnable()
 		{
 			SafeClean();
@@ -225,11 +228,21 @@ namespace Sasaki.Unity
 
 			if (_buffer != default && _buffer.Any()) _buffer.Dispose();
 		}
+
 		#endregion
 
 		public void Init(Color32 color, Action onDone, int collectionSize = 1, int cameraTotal = 6)
 		{
 			Init(new[] { color }, onDone, collectionSize);
+		}
+
+		/// <summary>
+		/// Resets the data collection, keeping the same colors and camera total
+		/// Use Init() for complete reset of finder
+		/// </summary>
+		public void SetNewDataCollection(int collectionSize = 1)
+		{
+			data = new PixelDataContainer(collectionSize);
 		}
 
 		Action OnDone;

@@ -18,9 +18,9 @@ namespace Sasaki.Unity
 			get => new[] { FinderDirection.Front };
 		}
 
-		public override void Init(int pointCount, Color32[] colors)
+		public override void Init(int collectionSize, Color32[] colors)
 		{
-			base.Init(pointCount, colors);
+			base.Init(collectionSize, colors);
 			foreach (var finder in finders)
 			{
 				finder.orthographicSize = orthoSize;

@@ -15,7 +15,19 @@ namespace Sasaki.Unity
 		[SerializeField, HideInInspector]
 		int _index;
 
-		public bool isRunning { get; protected set; }
+		(bool auto, bool running) _is;
+
+		public bool autoRun
+		{
+			get => _is.auto;
+			set => _is.auto = value;
+		}
+
+		public bool isRunning
+		{
+			get => _is.running;
+			protected set => _is.running = value;
+		}
 
 		public List<PixelFinderLayout> layouts
 		{
@@ -26,12 +38,18 @@ namespace Sasaki.Unity
 		public Vector3[] points
 		{
 			get => _points;
+			protected set => _points = value;
 		}
 
 		public int pointIndex
 		{
 			get => _index;
 			protected set => _index = value;
+		}
+
+		protected virtual IFinderSystemData dataContainer
+		{
+			get => new FinderSystemDataContainer(_layouts, name);
 		}
 
 		public bool allDone
@@ -46,11 +64,18 @@ namespace Sasaki.Unity
 			}
 		}
 
-		public void Clear()
+		public void ClearLayouts()
 		{
 			if (_layouts != null && _layouts.Any())
 				for (int i = _layouts.Count - 1; i >= 0; i--)
 					Destroy(_layouts[i].gameObject);
+		}
+
+		protected void ResetDataContainer(int collectionSize)
+		{
+			if (layouts != null && layouts.Any())
+				foreach (var f in layouts)
+					f.ResetDataContainer(collectionSize);
 		}
 
 		public void Init(Vector3[] systemPoints, Color32 color, List<PixelFinderLayout> inputLayouts = null)
@@ -62,7 +87,7 @@ namespace Sasaki.Unity
 		{
 			if (inputLayouts != null && inputLayouts.Any())
 			{
-				Clear();
+				ClearLayouts();
 				_layouts = inputLayouts;
 			}
 
@@ -76,15 +101,9 @@ namespace Sasaki.Unity
 			}
 		}
 
-		protected virtual void StartRun(int startingIndex = 0)
-		{
-			isRunning = true;
-
-			Run(startingIndex);
-		}
-
 		public void Run(int startingIndex = 0)
 		{
+			isRunning = true;
 			pointIndex = startingIndex;
 			MoveAndRender();
 		}
@@ -97,16 +116,29 @@ namespace Sasaki.Unity
 				layout.Run();
 		}
 
+		protected virtual void OnPostListComplete()
+		{
+			onComplete?.Invoke(dataContainer);
+		}
+
 		protected virtual void CheckFindersInSystem()
 		{
 			if (allDone)
 			{
-				pointIndex++;
+				// if we move manually we send the data back at each point
+				if (!autoRun)
+				{
+					isRunning = false;
+					onComplete?.Invoke(dataContainer);
+					return;
+				}
 
+				// if we are in auto run we check our points and move on
+				pointIndex++;
 				if (pointIndex >= points.Length)
 				{
 					isRunning = false;
-					onComplete?.Invoke(new FinderSystemDataContainer(_layouts));
+					OnPostListComplete();
 				}
 				else
 					MoveAndRender();
@@ -114,7 +146,9 @@ namespace Sasaki.Unity
 		}
 
 		#region Events
-		public event UnityAction<FinderSystemDataContainer> onComplete;
+
+		public event UnityAction<IFinderSystemData> onComplete;
+
 		#endregion
 
 	}

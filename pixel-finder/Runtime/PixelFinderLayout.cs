@@ -25,7 +25,7 @@ namespace Sasaki.Unity
 			}
 		}
 
-		public void Clear()
+		public void ClearFinders()
 		{
 			if (_finders != null && _finders.Any())
 				for (int i = _finders.Count - 1; i >= 0; i--)
@@ -39,10 +39,10 @@ namespace Sasaki.Unity
 			get => _finders;
 
 		}
-		
-		public FinderLayoutDataContainer data
+
+		public FinderLayoutDataContainer container
 		{
-			get => new FinderLayoutDataContainer(_finders);
+			get => new FinderLayoutDataContainer(_finders, name);
 		}
 
 		protected virtual void CheckFindersInLayout()
@@ -53,14 +53,21 @@ namespace Sasaki.Unity
 			}
 		}
 
-		public void Init(int pointCount, Color32 color)
+		public void ResetDataContainer(int collectionSize)
 		{
-			Init(pointCount, new[] { color });
+			if (_finders != null && _finders.Any())
+				foreach (var f in _finders)
+					f.SetNewDataCollection(collectionSize);
 		}
 
-		public virtual void Init(int pointCount, Color32[] colors)
+		public void Init(int collectionSize, Color32 color)
 		{
-			Clear();
+			Init(collectionSize, new[] { color });
+		}
+
+		public virtual void Init(int collectionSize, Color32[] colors)
+		{
+			ClearFinders();
 
 			var prefab = new GameObject().AddComponent<PixelFinder>();
 
@@ -80,7 +87,7 @@ namespace Sasaki.Unity
 					_ => new Vector3(0, 0, 0)
 				});
 
-				finder.Init(colors, CheckFindersInLayout, pointCount, typeCount);
+				finder.Init(colors, CheckFindersInLayout, collectionSize, typeCount);
 				_finders.Add(finder);
 			}
 
@@ -96,7 +103,9 @@ namespace Sasaki.Unity
 		internal abstract IEnumerable<FinderDirection> finderSetups { get; }
 
 		#region Events
+
 		public event UnityAction onComplete;
+
 		#endregion
 
 		public bool allDone
