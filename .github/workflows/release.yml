@@ -15,25 +15,8 @@ jobs:
           fetch-depth: 0
           
       - name: Release
-        id: semantic
-        uses: cycjimmy/semantic-release-action@v2
-        with:
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-          branch: main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Package
-        run: |
-          echo '### head info'
-          git log -1
-          
-          echo '### split upm branch'
-          git subtree split -P "$PKG_ROOT" -b upm
-          
-          echo '### update remote branch'
-          git checkout upm
-          git push -f -u origin upm
-        env:
-          PKG_ROOT: pixel-finder/
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run semantic-release -e semantic-release-monorepo
+    
