@@ -24,6 +24,7 @@ jobs:
           branch: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Package
         run: |
           echo '### head info'
           git log -1
