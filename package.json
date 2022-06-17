@@ -1,12 +1,26 @@
 {
-  "name": "com.sasaki.unity-tools",
+  "name": "unity-tools",
   "author": {
     "name": "david morgan",
     "email": "dmorgan@sasaki.com",
     "url": "https://www.sasaki.com"
   },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "boot": "lerna bootstrap --force-local",
+    "build": "npm run build-packages",
+    "build-packages": "lerna run build",
+    "semantic-release": "lerna exec --no-private --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo --tag-format='${LERNA_PACKAGE_NAME}-v${version}' debug"
+  },
   "devDependencies": {
     "semantic-release": "^19.0.3",
-    "semantic-release-monorepo": "^7.0.5"
+    "semantic-release-monorepo": "^7.0.5",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "dependencies": {
+    "lerna": "^5.1.4"
   }
 }

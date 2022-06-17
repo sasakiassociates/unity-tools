@@ -12,7 +12,6 @@
     "email": "dmorgan@sasaki.com",
     "url": "https://www.sasaki.com"
   },
-  "type": "library",
   "hideInEditor": false,
   "dependencies": {}
 }
