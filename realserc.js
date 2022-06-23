@@ -1,6 +1,7 @@
 module.exports = {
-  tagFormat: '$-v{version}',
+  // tagFormat: '{LERNA_PACKAGE_NAME}-v${version}',
   branches:  'main',
+  preset: 'angular',
   extends: 'semantic-release-monorepo',
   plugins: [
     '@semantic-release/commit-analyzer',
@@ -15,5 +16,4 @@ module.exports = {
     ],
     '@semantic-release/github',
   ],
-  preset: 'angular',
 };
