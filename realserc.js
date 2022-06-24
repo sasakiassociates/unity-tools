@@ -1,6 +1,5 @@
 module.exports = {
-  // tagFormat: '{LERNA_PACKAGE_NAME}-v${version}',
-  branches:  'main',
+  branches:  ['main'],
   preset: 'angular',
   extends: 'semantic-release-monorepo',
   plugins: [
