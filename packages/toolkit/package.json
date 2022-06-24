@@ -1,0 +1,22 @@
+{
+  "name": "com.sasaki.toolkit",
+  "version": "0.0.1",
+  "displayName": "Sasaki Toolkit",
+  "description": "A random set of Unity Tools",
+  "unity": "2020.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sasakiassociates/unity-tools.git",
+    "directory": "packages/toolkit"
+  },
+  "keywords": [
+    "Tool"
+  ],
+  "author": {
+    "name": "david morgan",
+    "email": "dmorgan@sasaki.com",
+    "url": "https://www.sasaki.com"
+  },
+  "hideInEditor": false,
+  "dependencies": {}
+}

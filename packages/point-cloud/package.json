@@ -1,0 +1,25 @@
+{
+  "name": "com.sasaki.pointcloud",
+  "version": "0.0.1",
+  "displayName": "Sasaki Point Clouds",
+  "description": "A Shader package for LAZ and Potree files",
+  "unity": "2020.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sasakiassociates/unity-tools.git",
+    "directory": "packages/point-cloud"
+  },
+  "keywords": [
+    "Tool",
+    "Pixel",
+    "Shader",
+    "GPU"
+  ],
+  "author": {
+    "name": "david morgan",
+    "email": "dmorgan@sasaki.com",
+    "url": "https://www.sasaki.com"
+  },
+  "hideInEditor": false,
+  "dependencies": {}
+}
