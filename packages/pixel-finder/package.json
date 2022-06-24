@@ -4,6 +4,10 @@
   "displayName": "Sasaki Pixel Finder",
   "description": "A Compute Shader tool for counting pixels from a Unity Camera",
   "unity": "2020.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sasakiassociates/unity-tools"
+  },
   "keywords": [
     "Tool",
     "Pixel",
