@@ -12,7 +12,7 @@
     "boot": "lerna bootstrap --force-local",
     "build": "npm run build-packages",
     "build-packages": "lerna run build",
-    "semantic-release": "lerna exec --no-private --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo --tag-format='${LERNA_PACKAGE_NAME}-v${version}' debug"
+    "semantic-release": "lerna exec --no-private --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
   },
   "devDependencies": {
     "semantic-release": "^19.0.3",
