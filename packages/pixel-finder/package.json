@@ -6,7 +6,8 @@
   "unity": "2020.3",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sasakiassociates/unity-tools"
+    "url": "https://github.com/sasakiassociates/unity-tools.git",
+    "directory": "packages/pixel-finder"
   },
   "keywords": [
     "Tool",
@@ -19,7 +20,6 @@
     "email": "dmorgan@sasaki.com",
     "url": "https://www.sasaki.com"
   },
-  "type": "library",
   "hideInEditor": false,
   "dependencies": {}
 }

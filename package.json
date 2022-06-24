@@ -5,6 +5,10 @@
     "email": "dmorgan@sasaki.com",
     "url": "https://www.sasaki.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sasakiassociates/unity-tools.git",
+  },
   "workspaces": [
     "packages/*"
   ],
