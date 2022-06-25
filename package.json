@@ -19,12 +19,13 @@
     "semantic-release": "lerna exec --no-private --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
   },
   "devDependencies": {
-    "semantic-release": "^19.0.3",
-    "semantic-release-monorepo": "^7.0.5",
     "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/git": "^10.0.1"
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^19.0.3",
+    "semantic-release-monorepo": "^7.0.5"
   },
   "dependencies": {
+    "conventional-changelog-conventionalcommits": "^5.0.0",
     "lerna": "^5.1.4"
   }
 }
