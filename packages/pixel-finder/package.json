@@ -21,5 +21,7 @@
     "url": "https://www.sasaki.com"
   },
   "hideInEditor": false,
-  "dependencies": {}
+  "dependencies": {
+    "com.sasaki.toolkit": "1.0.0"
+  }
 }
