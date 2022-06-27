@@ -1,6 +1,6 @@
 {
   "name": "com.sasaki.pointcloud",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Sasaki Point Clouds",
   "description": "A Shader package for LAZ and Potree files",
   "unity": "2020.3",
