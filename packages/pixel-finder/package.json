@@ -1,6 +1,6 @@
 {
   "name": "com.sasaki.pixelfinder",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "displayName": "Sasaki Pixel Finder",
   "description": "A Compute Shader tool for counting pixels from a Unity Camera",
   "unity": "2020.3",
@@ -22,6 +22,6 @@
   },
   "hideInEditor": false,
   "dependencies": {
-    "com.sasaki.toolkit": "1.0.1"
+    "com.sasaki.toolkit": "^1.0.2"
   }
 }

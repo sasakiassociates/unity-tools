@@ -1,3 +1,5 @@
+## [com.sasaki.pixelfinder-v1.0.2](https://github.com/sasakiassociates/unity-tools/compare/com.sasaki.pixelfinder-v1.0.1...com.sasaki.pixelfinder-v1.0.2) (2022-06-30)
+
 ## [com.sasaki.pixelfinder-v1.0.1](https://github.com/sasakiassociates/unity-tools/compare/com.sasaki.pixelfinder-v1.0.0...com.sasaki.pixelfinder-v1.0.1) (2022-06-25)
 
 # com.sasaki.pixelfinder-v1.0.0 (2022-06-24)
