@@ -22,6 +22,6 @@
   },
   "hideInEditor": false,
   "dependencies": {
-    "com.sasaki.toolkit": "1.0.0"
+    "com.sasaki.toolkit": "1.0.1"
   }
 }
