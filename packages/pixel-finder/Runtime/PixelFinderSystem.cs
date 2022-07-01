@@ -9,13 +9,11 @@ namespace Sasaki.Unity
 	{
 		[SerializeField] List<PixelFinderLayout> _layouts;
 
-		[SerializeField, HideInInspector]
-		Vector3[] _points;
+		[SerializeField, HideInInspector] Vector3[] _points;
 
-		[SerializeField, HideInInspector]
-		int _index;
+		[SerializeField, HideInInspector] int _index;
 
-		(bool auto, bool running) _is;
+		(bool auto, bool running, bool compelte) _is;
 
 		public bool autoRun
 		{
@@ -27,6 +25,12 @@ namespace Sasaki.Unity
 		{
 			get => _is.running;
 			protected set => _is.running = value;
+		}
+
+		public bool isComplete
+		{
+			get => _is.compelte;
+			protected set => _is.compelte = value;
 		}
 
 		public List<PixelFinderLayout> layouts
@@ -83,6 +87,12 @@ namespace Sasaki.Unity
 			Init(systemPoints, new[] { color }, inputLayouts);
 		}
 
+		/// <summary>
+		/// Initialize the system. Will clear any existing layouts and data
+		/// </summary>
+		/// <param name="systemPoints">Points where analysis will be captured</param>
+		/// <param name="colors">Pixel color that will be searched for</param>
+		/// <param name="inputLayouts">Type of layouts to use with this system</param>
 		public virtual void Init(Vector3[] systemPoints, Color32[] colors, List<PixelFinderLayout> inputLayouts = null)
 		{
 			if (inputLayouts != null && inputLayouts.Any())
@@ -96,15 +106,22 @@ namespace Sasaki.Unity
 			foreach (var layout in _layouts)
 			{
 				layout.Init(_points.Length, colors);
-				layout.onComplete += CheckFindersInSystem;
+				layout.onComplete += CheckLayoutsInSystem;
 				layout.transform.SetParent(transform);
 			}
 		}
 
+		/// <summary>
+		/// Starts the system
+		/// </summary>
+		/// <param name="startingIndex">the index to start the system at</param>
 		public void Run(int startingIndex = 0)
 		{
-			isRunning = true;
 			pointIndex = startingIndex;
+
+			isRunning = true;
+			// isComplete = false;
+
 			MoveAndRender();
 		}
 
@@ -112,24 +129,26 @@ namespace Sasaki.Unity
 		{
 			// step move forward
 			transform.position = points[pointIndex];
+			
 			foreach (var layout in _layouts)
-				layout.Run();
+				layout.Run(pointIndex);
 		}
 
-		protected virtual void OnPostListComplete()
-		{
-			onComplete?.Invoke(dataContainer);
-		}
-
-		protected virtual void CheckFindersInSystem()
+		void CheckLayoutsInSystem()
 		{
 			if (allDone)
 			{
+				// if (isComplete)
+				// {
+				// 	Debug.Log($"{name} is already completed");
+				// 	return;
+				// }
+
 				// if we move manually we send the data back at each point
 				if (!autoRun)
 				{
 					isRunning = false;
-					onComplete?.Invoke(dataContainer);
+					GatherSystemData();
 					return;
 				}
 
@@ -138,11 +157,17 @@ namespace Sasaki.Unity
 				if (pointIndex >= points.Length)
 				{
 					isRunning = false;
-					OnPostListComplete();
+					GatherSystemData();
+					// isComplete = true;
 				}
 				else
 					MoveAndRender();
 			}
+		}
+
+		protected virtual void GatherSystemData()
+		{
+			onComplete?.Invoke(dataContainer);
 		}
 
 		#region Events

@@ -94,7 +94,7 @@ namespace Sasaki.Unity
 			Destroy(prefab.gameObject);
 		}
 
-		public void Run(int index = 0)
+		public void Run(int index)
 		{
 			foreach (var finder in _finders)
 				StartCoroutine(finder.Render(index));
