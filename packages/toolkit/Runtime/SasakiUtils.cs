@@ -2,8 +2,9 @@ using UnityEngine;
 
 namespace Sasaki
 {
-	public static class SasakiUtils
+	public static partial class SasakiUtils
 	{
+
 		public static Texture2D DrawPixelLine(this Color32[] c, bool readAlpha = false)
 		{
 			var tempTexture = new Texture2D(c.Length, 1);
