@@ -7,6 +7,6 @@
 		Back,
 		Right,
 		Up,
-		Down,
+		Down
 	}
 }

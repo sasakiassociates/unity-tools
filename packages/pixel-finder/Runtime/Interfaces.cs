@@ -12,18 +12,22 @@ namespace Sasaki.Unity
 
 		public int size { get; }
 	}
-	
+
 	public interface IFinderSystemData
 	{
 		public string name { get; }
+
 		public string[] layoutNames { get; }
+
 		public FinderLayoutDataContainer[] data { get; }
 	}
-	
+
 	public interface IFinderLayoutData
 	{
 		public string name { get; }
+
 		public string[] finderNames { get; }
+
 		public PixelDataContainer[] data { get; }
 	}
 }

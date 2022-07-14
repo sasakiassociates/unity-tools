@@ -3,9 +3,13 @@ using UnityEngine;
 
 namespace Sasaki.Unity
 {
+	/// <summary>
+	///   A single finder with ortho settings
+	/// </summary>
+	[AddComponentMenu("Sasaki/PixelFinder/Ortho Layout")]
 	public class PixelFinderOrtho : PixelFinderLayout
 	{
-		[SerializeField] private float _orthoSize;
+		[SerializeField] float _orthoSize;
 
 		public float orthoSize
 		{
@@ -21,10 +25,7 @@ namespace Sasaki.Unity
 		public override void Init(int collectionSize, Color32[] colors)
 		{
 			base.Init(collectionSize, colors);
-			foreach (var finder in finders)
-			{
-				finder.orthographicSize = orthoSize;
-			}
+			foreach (var finder in finders) finder.orthographicSize = orthoSize;
 		}
 	}
 

@@ -1,58 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Sasaki.Unity
 {
+	/// <summary>
+	///   Abstract class for handling different layouts of pixel finders.
+	/// </summary>
 	public abstract class PixelFinderLayout : MonoBehaviour
 	{
-		[SerializeField, HideInInspector]
-		List<PixelFinder> _finders;
+		[SerializeField] [HideInInspector] List<PixelFinder> _finders;
 
-		public int typeCount
+		public UnityAction<Texture2D> OnScreenShotRendered;
+
+		internal abstract IEnumerable<FinderDirection> finderSetups { get; }
+
+		public bool captureScreenShot { get; set; }
+
+		/// <summary>
+		///   returns true if all finders have completed their tasks
+		/// </summary>
+		public bool allDone
+		{
+			get
+			{
+				foreach (var f in _finders)
+					if (!f.isDone)
+						return false;
+
+				return true;
+			}
+		}
+
+		/// <summary>
+		///   Simple property for setting the name of a layout type
+		/// </summary>
+		protected virtual string layoutName
+		{
+			get => GetType().ToString().Split('.').LastOrDefault();
+		}
+
+		/// <summary>
+		///   Returns the count of how many finders are in the layout
+		/// </summary>
+		public int finderCount
 		{
 			get => finderSetups.Count();
 		}
 
-		public int cullingMasks
+		/// <summary>
+		///   Sets the culling mask for all finders
+		/// </summary>
+		public int mask
 		{
 			set
 			{
 				foreach (var finder in _finders)
-					finder.cam.cullingMask = value;
+					finder.mask = value;
 			}
 		}
 
-		public void ClearFinders()
-		{
-			if (_finders != null && _finders.Any())
-				for (int i = _finders.Count - 1; i >= 0; i--)
-					Destroy(_finders[i].gameObject);
-
-			_finders = new List<PixelFinder>(typeCount);
-		}
-
+		/// <summary>
+		///   list of all pixel finders in layout
+		/// </summary>
 		public List<PixelFinder> finders
 		{
 			get => _finders;
 
 		}
 
+		/// <summary>
+		///   Copies all the data from the finders in this layout
+		/// </summary>
 		public FinderLayoutDataContainer container
 		{
-			get => new FinderLayoutDataContainer(_finders, name);
+			get => new(_finders, name);
 		}
 
-		protected virtual void CheckFindersInLayout()
+		/// <summary>
+		///   Destroys all finders and their gameobjects
+		/// </summary>
+		public void ClearFinders()
 		{
-			if (allDone)
-			{
-				onComplete?.Invoke();
-			}
+			if (_finders != null && _finders.Any())
+				for (var i = _finders.Count - 1; i >= 0; i--)
+					Destroy(_finders[i].gameObject);
+
+			_finders = new List<PixelFinder>(finderCount);
 		}
 
+		/// <summary>
+		///   Resets all data containers to be empty
+		/// </summary>
+		/// <param name="collectionSize">collection size to set each finder at</param>
 		public void ResetDataContainer(int collectionSize)
 		{
 			if (_finders != null && _finders.Any())
@@ -60,14 +101,26 @@ namespace Sasaki.Unity
 					f.SetNewDataCollection(collectionSize);
 		}
 
+		/// <summary>
+		///   Initialize the layout with finders
+		/// </summary>
+		/// <param name="collectionSize"></param>
+		/// <param name="color"></param>
 		public void Init(int collectionSize, Color32 color)
 		{
 			Init(collectionSize, new[] { color });
 		}
 
+		/// <summary>
+		///   Initialize the layout with new finders
+		/// </summary>
+		/// <param name="collectionSize">the size of the values to store</param>
+		/// <param name="colors">the pixel color the finders should look for</param>
 		public virtual void Init(int collectionSize, Color32[] colors)
 		{
 			ClearFinders();
+
+			name = layoutName;
 
 			var prefab = new GameObject().AddComponent<PixelFinder>();
 
@@ -87,38 +140,33 @@ namespace Sasaki.Unity
 					_ => new Vector3(0, 0, 0)
 				});
 
-				finder.Init(colors, CheckFindersInLayout, collectionSize, typeCount);
+				finder.Init(colors, CheckFindersInLayout, collectionSize, finderCount);
 				_finders.Add(finder);
 			}
 
 			Destroy(prefab.gameObject);
 		}
 
+		/// <summary>
+		///   Starts the coroutine for each pixel finder in the layout at the selected index
+		/// </summary>
+		/// <param name="index">position to store data at</param>
 		public void Run(int index)
 		{
 			foreach (var finder in _finders)
 				StartCoroutine(finder.Render(index));
 		}
 
-		internal abstract IEnumerable<FinderDirection> finderSetups { get; }
-
-		#region Events
+		/// <summary>
+		///   Triggers on complete event if all layouts are complete
+		/// </summary>
+		protected void CheckFindersInLayout()
+		{
+			if (allDone)
+				onComplete?.Invoke();
+		}
 
 		public event UnityAction onComplete;
-
-		#endregion
-
-		public bool allDone
-		{
-			get
-			{
-				foreach (var f in _finders)
-					if (!f.isDone)
-						return false;
-
-				return true;
-			}
-		}
 	}
 
 }
