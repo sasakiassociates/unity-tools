@@ -22,16 +22,6 @@
   },
   "hideInEditor": false,
   "dependencies": {
-    "com.sasaki.toolkit": "1.0.3"
-  },
-  "scopedRegistries": [
-    {
-      "name": "package.openupm.com",
-      "url": "https://package.openupm.com",
-      "scopes": [
-        "com.sasaki.toolkit",
-        "com.openupm"
-      ]
-    }
-  ]
+    "com.sasaki.toolkit": "git+https://github.com/sasakiassociates/unity-tools.git#com.sasaki.toolkit-v1.0.3"
+  }
 }
