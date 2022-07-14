@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Sasaki.Unity
 {
 	public class PixelFinderSystemTester : MonoBehaviour
 	{
-		[SerializeField] private int pointCount;
+		[SerializeField] int pointCount;
 
 		[SerializeField] GameObject frontObj, leftObj, rightObj, backObj;
 
@@ -18,14 +17,17 @@ namespace Sasaki.Unity
 			get => Shader.PropertyToID("_diffuseColor");
 		}
 
-		private Color32[] colors =>
-			new Color32[]
-			{
-				frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
-				leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
-				rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
-				backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
-			};
+		Color32[] colors
+		{
+			get =>
+				new Color32[]
+				{
+					frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
+					leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
+					rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor),
+					backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor)
+				};
+		}
 
 		void OnGUI()
 		{
@@ -37,7 +39,7 @@ namespace Sasaki.Unity
 		{
 			points = new Vector3[pointCount];
 
-			for (int i = 0; i < pointCount; i++)
+			for (var i = 0; i < pointCount; i++)
 				points[i] = transform.position;
 
 			layout.Init(points.Length, colors);
@@ -46,6 +48,5 @@ namespace Sasaki.Unity
 
 			layout.Run(0);
 		}
-
 	}
 }

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Timers;
 using UnityEngine;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -20,7 +18,7 @@ namespace Sasaki.Unity
 
 		List<PixelFinder> pixelFinder;
 
-		float m_UpdateTime = -1;
+		Stopwatch timer;
 
 		static int DiffuseColor
 		{
@@ -32,7 +30,12 @@ namespace Sasaki.Unity
 			Test_UseSeparateColorsForEachShader();
 		}
 
-		Stopwatch timer;
+		void OnGUI()
+		{
+			if (GUI.Button(new Rect(10, 10, 50, 15), "Run"))
+				Do();
+		}
+
 		void Do()
 		{
 			timer = new Stopwatch();
@@ -41,28 +44,19 @@ namespace Sasaki.Unity
 			if (systemType == FinderSystemType.ComputeShader)
 				foreach (var finder in pixelFinder)
 					StartCoroutine(finder.Render());
-			
 		}
 
-		void OnGUI()
-		{
-			if (GUI.Button(new Rect(10, 10, 50, 15), "Run"))
-				Do();
-		}
-
-		private void Check()
+		void Check()
 		{
 			if (systemType == FinderSystemType.ComputeShader)
 			{
 				foreach (var finder in pixelFinder)
-				{
 					if (!finder.isDone)
 					{
 						Debug.Log($"{finder.name} is not done");
 						return;
 					}
-				}
-				
+
 				foreach (var finder in pixelFinder)
 					Debug.Log(finder.data.data[0][0]);
 			}
@@ -71,7 +65,7 @@ namespace Sasaki.Unity
 
 			Debug.Log($"Complete {systemType}: {timer.Elapsed}");
 		}
-		
+
 		void Test_UseSeparateColorsForEachShader()
 		{
 			var parent = new GameObject("Shader");
