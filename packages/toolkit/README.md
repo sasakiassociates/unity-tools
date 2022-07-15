@@ -1,3 +1,3 @@
 # Sasaki Toolkit 
 
-A small set of static helpers for unity things
+A small set of static helpers for unity things.
