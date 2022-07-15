@@ -432,6 +432,8 @@ namespace Sasaki.Unity
 			if (_rt.temp != null) _rt.temp.Release();
 
 			if (_buffer != default && _buffer.Any()) _buffer.Dispose();
+			
+			_histogramBuffer?.Dispose();
 		}
 
 		void CreateBuffers()
