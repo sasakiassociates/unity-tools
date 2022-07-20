@@ -127,16 +127,16 @@ namespace Sasaki.Unity
 			foreach (var s in finderSetups)
 			{
 				var finder = Instantiate(prefab, transform, true);
-				finder.name = "Finder[" + s + "]";
+				finder.name = $"Finder[{s}]";
 
-				transform.localRotation = Quaternion.Euler(s switch
+				finder.transform.localRotation = Quaternion.Euler(s switch
 				{
 					FinderDirection.Front => new Vector3(0, 0, 0),
 					FinderDirection.Left => new Vector3(0, 90, 0),
 					FinderDirection.Back => new Vector3(0, 180, 0),
 					FinderDirection.Right => new Vector3(0, -90, 0),
-					FinderDirection.Up => new Vector3(90, 0, 0),
-					FinderDirection.Down => new Vector3(-90, 0, 0),
+					FinderDirection.Up => new Vector3(-90, 0, 0),
+					FinderDirection.Down => new Vector3(90, 0, 0),
 					_ => new Vector3(0, 0, 0)
 				});
 
