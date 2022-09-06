@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Sasaki.Unity
 {
-
 	/// <summary>
 	///   A six sided pixel finder layout
 	/// </summary>
