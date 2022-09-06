@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
 namespace Sasaki.Unity
 {
@@ -11,6 +12,19 @@ namespace Sasaki.Unity
 		public RenderTexture texture { get; }
 
 		public int size { get; }
+
+		public event UnityAction<uint[]> onValueSet;
+
+		public Color32[] colors { get; }
+	}
+
+	public interface IFinderLayoutData
+	{
+		public string name { get; }
+
+		public string[] finderNames { get; }
+
+		public PixelDataContainer[] data { get; }
 	}
 
 	public interface IFinderSystemData
@@ -22,12 +36,4 @@ namespace Sasaki.Unity
 		public FinderLayoutDataContainer[] data { get; }
 	}
 
-	public interface IFinderLayoutData
-	{
-		public string name { get; }
-
-		public string[] finderNames { get; }
-
-		public PixelDataContainer[] data { get; }
-	}
 }

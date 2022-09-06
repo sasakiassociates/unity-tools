@@ -58,7 +58,7 @@ namespace Sasaki.Unity
 					}
 
 				foreach (var finder in pixelFinder)
-					Debug.Log(finder.data.data[0][0]);
+					Debug.Log(finder.data.Copy(0));
 			}
 
 			timer.Stop();

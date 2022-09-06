@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -36,18 +37,12 @@ namespace Sasaki.Unity
 		/// <summary>
 		///   Simple property for setting the name of a layout type
 		/// </summary>
-		protected virtual string layoutName
-		{
-			get => GetType().ToString().Split('.').LastOrDefault();
-		}
+		protected virtual string layoutName => GetType().ToString().Split('.').LastOrDefault();
 
 		/// <summary>
 		///   Returns the count of how many finders are in the layout
 		/// </summary>
-		public int finderCount
-		{
-			get => finderSetups.Count();
-		}
+		public int finderCount => finderSetups.Count();
 
 		/// <summary>
 		///   Sets the culling mask for all finders
@@ -64,19 +59,12 @@ namespace Sasaki.Unity
 		/// <summary>
 		///   list of all pixel finders in layout
 		/// </summary>
-		public List<PixelFinder> finders
-		{
-			get => _finders;
-
-		}
+		public List<PixelFinder> finders => _finders;
 
 		/// <summary>
 		///   Copies all the data from the finders in this layout
 		/// </summary>
-		public FinderLayoutDataContainer container
-		{
-			get => new(_finders, name);
-		}
+		public FinderLayoutDataContainer container => new(_finders, name);
 
 		/// <summary>
 		///   Destroys all finders and their gameobjects
@@ -104,19 +92,18 @@ namespace Sasaki.Unity
 		/// <summary>
 		///   Initialize the layout with finders
 		/// </summary>
-		/// <param name="collectionSize"></param>
-		/// <param name="color"></param>
-		public void Init(int collectionSize, Color32 color)
-		{
-			Init(collectionSize, new[] { color });
-		}
+		/// <param name="collectionSize">Total collection size for data container</param>
+		/// <param name="color">Color to look for</param>
+		/// <param name="onDone">Optional hook to use when rendering is complete</param>
+		public void Init(int collectionSize, Color32 color, Action onDone = null) => Init(collectionSize, new[] { color }, onDone);
 
 		/// <summary>
 		///   Initialize the layout with new finders
 		/// </summary>
-		/// <param name="collectionSize">the size of the values to store</param>
-		/// <param name="colors">the pixel color the finders should look for</param>
-		public virtual void Init(int collectionSize, Color32[] colors)
+		/// <param name="collectionSize">Total collection size for data container</param>
+		/// <param name="colors">Colors to look for</param>
+		/// <param name="onDone">Optional hook to use when rendering is complete</param>
+		public virtual void Init(int collectionSize, Color32[] colors, Action onDone = null)
 		{
 			ClearFinders();
 
@@ -140,7 +127,7 @@ namespace Sasaki.Unity
 					_ => new Vector3(0, 0, 0)
 				});
 
-				finder.Init(colors, CheckFindersInLayout, collectionSize, finderCount);
+				finder.Init(colors, onDone ?? CheckFindersInLayout, collectionSize, finderCount);
 				_finders.Add(finder);
 			}
 
@@ -162,8 +149,7 @@ namespace Sasaki.Unity
 		/// </summary>
 		protected void CheckFindersInLayout()
 		{
-			if (allDone)
-				onComplete?.Invoke();
+			if (allDone) onComplete?.Invoke();
 		}
 
 		public event UnityAction onComplete;

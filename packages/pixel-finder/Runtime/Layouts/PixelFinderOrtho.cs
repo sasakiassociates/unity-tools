@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Sasaki.Unity
@@ -22,9 +23,10 @@ namespace Sasaki.Unity
 			get => new[] { FinderDirection.Front };
 		}
 
-		public override void Init(int collectionSize, Color32[] colors)
+		public override void Init(int collectionSize, Color32[] colors, Action onDone = null)
 		{
-			base.Init(collectionSize, colors);
+			base.Init(collectionSize, colors, onDone);
+
 			foreach (var finder in finders) finder.orthographicSize = orthoSize;
 		}
 	}

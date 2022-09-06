@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
@@ -14,12 +15,6 @@ namespace Sasaki.Unity
 	[RequireComponent(typeof(Camera))]
 	public sealed class PixelFinder : MonoBehaviour, IPixelFinder
 	{
-		public const uint MAX_VALUE = 16384;
-
-		public const uint MAX_PIXELS_IN_VIEW = 2223114636;
-
-		[Obsolete("Old max value for possible pixels in a view. Use MAX_VALUE", true)]
-		public const uint MAX_VALUE_OLD = 1395882500;
 
 		const string PixelFinderInit = "PixelFinderInitialize";
 
@@ -45,15 +40,15 @@ namespace Sasaki.Unity
 
 		[SerializeField] [HideInInspector] Color32[] _colors;
 
-		[SerializeField] uint[] histogramData;
+		[SerializeField] uint[] _histogramData;
 
-		[SerializeField] ComputeShader pixelShader;
+		[SerializeField] ComputeShader _pixelShader;
 
 		NativeArray<Color32> _buffer;
 
-		(int color, int camera) _counts;
-
 		ComputeBuffer _histogramBuffer;
+
+		(int color, int camera) _counts;
 
 		(bool done, bool ready) _is;
 
@@ -117,10 +112,7 @@ namespace Sasaki.Unity
 		/// <summary>
 		///   Reports the total collection size
 		/// </summary>
-		public int collectionCount
-		{
-			get => data.data?.Length ?? 0;
-		}
+		public int collectionCount => data.Size();
 
 		/// <summary>
 		///   Count of colors being searched for
@@ -209,40 +201,6 @@ namespace Sasaki.Unity
 			set => cam.orthographicSize = value;
 		}
 
-		void OnEnable()
-		{
-			SafeClean();
-
-			// NOTE: the GC seems to dispose of the buffers or something like that
-			SceneManager.sceneUnloaded += _ => SafeClean();
-
-			_rt.main = new RenderTexture(size, size, _depthBuffer);
-			_rt.main.name = $"{gameObject.name}-CameraTexture-Main";
-
-			_rt.temp = new RenderTexture(size, size, _depthBuffer);
-			_rt.temp.name = $"{gameObject.name}-CameraTexture-Temp";
-
-			_camera = gameObject.GetComponent<Camera>();
-			if (_camera == null)
-				_camera = gameObject.AddComponent<Camera>();
-
-			_camera.targetTexture = _rt.main;
-
-			_buffer = new NativeArray<Color32>(size * size,
-			                                   Allocator.Persistent,
-			                                   NativeArrayOptions.UninitializedMemory);
-		}
-
-		void OnDisable()
-		{
-			SafeClean();
-		}
-
-		void OnDestroy()
-		{
-			SafeClean();
-		}
-
 		/// <summary>
 		///   Background color for the attached camera
 		/// </summary>
@@ -276,10 +234,40 @@ namespace Sasaki.Unity
 			get => 512;
 		}
 
+		public event UnityAction<uint[]> onValueSet;
+
 		/// <summary>
 		///   Callback event triggered once the analysis is completed
 		/// </summary>
-		event Action OnDone;
+		public event Action OnDone;
+
+		void OnEnable()
+		{
+			SafeClean();
+
+			// NOTE: the GC seems to dispose of the buffers or something like that
+			SceneManager.sceneUnloaded += _ => SafeClean();
+
+			_rt.main = new RenderTexture(size, size, _depthBuffer);
+			_rt.main.name = $"{gameObject.name}-CameraTexture-Main";
+
+			_rt.temp = new RenderTexture(size, size, _depthBuffer);
+			_rt.temp.name = $"{gameObject.name}-CameraTexture-Temp";
+
+			_camera = gameObject.GetComponent<Camera>();
+			if (_camera == null)
+				_camera = gameObject.AddComponent<Camera>();
+
+			_camera.targetTexture = _rt.main;
+
+			_buffer = new NativeArray<Color32>(size * size,
+			                                   Allocator.Persistent,
+			                                   NativeArrayOptions.UninitializedMemory);
+		}
+
+		void OnDisable() => SafeClean();
+
+		void OnDestroy() => SafeClean();
 
 		/// <summary>
 		///   Initializes a new pixel finder, clearing all data and parameters
@@ -288,10 +276,7 @@ namespace Sasaki.Unity
 		/// <param name="onDone"></param>
 		/// <param name="collectionSize"></param>
 		/// <param name="cameraTotal"></param>
-		public void Init(Color32 color, Action onDone, int collectionSize = 1, int cameraTotal = 6)
-		{
-			Init(new[] { color }, onDone, collectionSize);
-		}
+		public void Init(Color32 color, Action onDone = null, int collectionSize = 1, int cameraTotal = 6) => Init(new[] { color }, onDone, collectionSize);
 
 		/// <summary>
 		///   Initializes a new pixel finder, clearing all data and parameters
@@ -300,7 +285,7 @@ namespace Sasaki.Unity
 		/// <param name="onDone"></param>
 		/// <param name="collectionSize"></param>
 		/// <param name="cameraTotal"></param>
-		public void Init(Color32[] inputColors, Action onDone, int collectionSize = 1, int cameraTotal = 6)
+		public void Init(Color32[] inputColors, Action onDone = null, int collectionSize = 1, int cameraTotal = 6)
 		{
 			// draws the texture needed for analysis
 			colors = inputColors;
@@ -321,14 +306,14 @@ namespace Sasaki.Unity
 
 			data = new PixelDataContainer(collectionSize);
 
-			if (pixelShader == null)
+			if (_pixelShader == null)
 			{
 				#if UNITY_EDITOR
-				pixelShader =
+				_pixelShader =
 					Instantiate(AssetDatabase.LoadAssetAtPath<ComputeShader>("Packages/com.sasaki.pixelfinder/Runtime/Shader/PixelFinder.compute"));
 				#endif
 
-				if (pixelShader == null)
+				if (_pixelShader == null)
 				{
 					Debug.LogWarning("No Active Shader Found");
 					return;
@@ -337,15 +322,15 @@ namespace Sasaki.Unity
 
 			CreateBuffers();
 
-			_kern.Init = pixelShader.FindKernel(PixelFinderInit);
-			pixelShader.SetBuffer(_kern.Init, PixelCountBuffer, _histogramBuffer);
+			_kern.Init = _pixelShader.FindKernel(PixelFinderInit);
+			_pixelShader.SetBuffer(_kern.Init, PixelCountBuffer, _histogramBuffer);
 
-			_kern.Main = pixelShader.FindKernel(PixelFinderMain);
-			pixelShader.SetBuffer(_kern.Main, PixelCountBuffer, _histogramBuffer);
-			pixelShader.SetTexture(_kern.Main, ColorArrayTexture, colorStrip);
-			pixelShader.SetInt(InputTextureSize, 512);
+			_kern.Main = _pixelShader.FindKernel(PixelFinderMain);
+			_pixelShader.SetBuffer(_kern.Main, PixelCountBuffer, _histogramBuffer);
+			_pixelShader.SetTexture(_kern.Main, ColorArrayTexture, colorStrip);
+			_pixelShader.SetInt(InputTextureSize, 512);
 
-			if (_kern.Init < 0 || _kern.Main < 0 || null == _histogramBuffer || null == histogramData)
+			if (_kern.Init < 0 || _kern.Main < 0 || null == _histogramBuffer || null == _histogramData)
 				isReady = false;
 			else
 				isReady = true;
@@ -393,6 +378,7 @@ namespace Sasaki.Unity
 				if (request.hasError) throw new Exception("AsyncGPUReadback.RequestIntoNativeArray");
 
 				OnCompleteReadback(request);
+
 				isDone = true;
 
 				OnDone?.Invoke();
@@ -407,21 +393,17 @@ namespace Sasaki.Unity
 				CreateBuffers();
 			}
 
-			pixelShader.SetBuffer(_kern.Init, PixelCountBuffer, _histogramBuffer);
-			pixelShader.SetBuffer(_kern.Main, PixelCountBuffer, _histogramBuffer);
-			pixelShader.SetTexture(_kern.Main, InputTexture, texture);
-			pixelShader.Dispatch(_kern.Init, 256 / 64, 1, 1);
-			pixelShader.Dispatch(_kern.Main, (texture.width + 7) / 8, (texture.height + 7) / 8, 1);
+			_pixelShader.SetBuffer(_kern.Init, PixelCountBuffer, _histogramBuffer);
+			_pixelShader.SetBuffer(_kern.Main, PixelCountBuffer, _histogramBuffer);
+			_pixelShader.SetTexture(_kern.Main, InputTexture, texture);
+			_pixelShader.Dispatch(_kern.Init, 256 / 64, 1, 1);
+			_pixelShader.Dispatch(_kern.Main, (texture.width + 7) / 8, (texture.height + 7) / 8, 1);
 
-			// NOTE: Performance impact with snagging the GPU data
-			_histogramBuffer.GetData(histogramData);
+			_histogramBuffer.GetData(_histogramData);
 
-			var res = new double[histogramData.Length];
+			data.Set(_histogramData, _index);
 
-			for (var i = 0; i < histogramData.Length; i++)
-				res[i] = (double)histogramData[i] / MAX_PIXELS_IN_VIEW / cameraCount;
-
-			data.Set(res, _index);
+			onValueSet?.Invoke(_histogramData);
 		}
 
 		void SafeClean()
@@ -432,7 +414,7 @@ namespace Sasaki.Unity
 			if (_rt.temp != null) _rt.temp.Release();
 
 			if (_buffer != default && _buffer.Any()) _buffer.Dispose();
-			
+
 			_histogramBuffer?.Dispose();
 		}
 
@@ -442,9 +424,9 @@ namespace Sasaki.Unity
 
 			_histogramBuffer = new ComputeBuffer(colorCount, sizeof(uint));
 
-			histogramData = new uint[colorCount];
+			_histogramData = new uint[colorCount];
 
-			pixelShader.SetInt(ColorArraySize, colorCount);
+			_pixelShader.SetInt(ColorArraySize, colorCount);
 		}
 	}
 }

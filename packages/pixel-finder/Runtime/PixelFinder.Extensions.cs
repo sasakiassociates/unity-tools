@@ -1,9 +1,53 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Sasaki.Unity
 {
-	public static class FinderExtension
+
+	public static class ValueExtensions
 	{
+		public const uint MAX_VALUE = 16384;
+
+		public const uint MAX_PIXELS_IN_VIEW = 2223114636;
+
+		[Obsolete("Old max value for possible pixels in a view. Use MAX_VALUE", true)]
+		public const uint MAX_VALUE_OLD = 1395882500;
+
+		public static double[] NormalizeByCameraCount(uint[] values, int cameraCount)
+		{
+			if (values == null) return Array.Empty<double>();
+
+			var res = new double[values.Length];
+
+			for (var i = 0; i < values.Length; i++)
+				res[i] = (double)values[i] / MAX_PIXELS_IN_VIEW / cameraCount;
+
+			return res;
+		}
+	}
+
+	public static class FinderExtensions
+	{
+
+		/// <summary>
+		/// Shortcut for getting the Shader property ID of "_diffuseColor"
+		/// </summary>
+		public static int DiffuseColor => Shader.PropertyToID("_diffuseColor");
+
+		public static bool TryGetDiffuseColor(this GameObject obj, out Color32 color)
+		{
+			color = default;
+
+			if (obj != null && obj.GetComponent<MeshRenderer>() && obj.GetComponent<MeshRenderer>().material.HasProperty(DiffuseColor))
+			{
+				color = obj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor);
+				return true;
+			}
+
+			return false;
+		}
+
 		/// <summary>
 		///   Command for saving the finders texture to a png
 		/// </summary>

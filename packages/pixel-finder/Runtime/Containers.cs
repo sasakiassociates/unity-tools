@@ -1,18 +1,49 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Sasaki.Unity
 {
+
+	/// <summary>
+	/// The main data object that stores the pixel counts 
+	/// </summary>
 	public readonly struct PixelDataContainer
 	{
-		public PixelDataContainer(int totalSize = 1) => data = new double[totalSize][];
+		readonly uint[][] _data;
 
-		public double[][] data { get; }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="totalSize">The amount of data to record</param>
+		public PixelDataContainer(int totalSize = 1) => _data = new uint[totalSize][];
 
-		public void Set(double[] values, int index = 0)
-		{
-			data[index] = values;
-		}
+		/// <summary>
+		/// Store the values from a pixel finder
+		/// </summary>
+		/// <param name="values">Raw values</param>
+		/// <param name="index">Associated position</param>
+		public void Set(uint[] values, int index = 0) => _data[index] = values;
+
+		/// <summary>
+		/// Gather all the data from the container
+		/// </summary>
+		/// <returns></returns>
+		public uint[][] Get() => _data;
+
+		/// <summary>
+		/// Copy a single set of values from the container
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public uint[] Copy(int index) => _data?.Length > index ? _data[index] : null;
+		
+		/// <summary>
+		/// Get the size of the pixel container
+		/// </summary>
+		/// <returns></returns>
+		public int Size() => _data?.Length ?? 0;
+
 	}
 
 	public readonly struct FinderLayoutDataContainer : IFinderLayoutData
