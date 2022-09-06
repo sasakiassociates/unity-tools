@@ -1,3 +1,10 @@
+## [com.sasaki.pixelfinder-v1.0.7](https://github.com/sasakiassociates/unity-tools/compare/com.sasaki.pixelfinder-v1.0.6...com.sasaki.pixelfinder-v1.0.7) (2022-09-06)
+
+
+### Build System
+
+* **finder:** updated samples with ui stuff ([e178fec](https://github.com/sasakiassociates/unity-tools/commit/e178feccaa30834d724ab77f2e784be0bb126a38))
+
 ## [com.sasaki.pixelfinder-v1.0.6](https://github.com/sasakiassociates/unity-tools/compare/com.sasaki.pixelfinder-v1.0.5...com.sasaki.pixelfinder-v1.0.6) (2022-07-20)
 
 ## [com.sasaki.pixelfinder-v1.0.5](https://github.com/sasakiassociates/unity-tools/compare/com.sasaki.pixelfinder-v1.0.4...com.sasaki.pixelfinder-v1.0.5) (2022-07-15)
