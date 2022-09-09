@@ -27,17 +27,27 @@ namespace Sasaki.Unity
 
 		/// <summary>
 		/// Gather all the data from the container
+		/// This will cast all the pixel data from <see cref="uint"/> to <see cref="int"/>
 		/// </summary>
-		/// <returns></returns>
-		public uint[][] Get() => _data;
+		/// <returns>Values casted as ints</returns>
+		public int[][] Get()
+		{
+			var casted = new int[_data.Length][];
+
+			for (int i = 0; i < _data.Length; i++)
+				casted[i] = _data[i].Select(x => (int)x).ToArray();
+
+			return casted;
+		}
 
 		/// <summary>
 		/// Copy a single set of values from the container
+		/// This will cast all the pixel data from <see cref="uint"/> to <see cref="int"/>
 		/// </summary>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		public uint[] Copy(int index) => _data?.Length > index ? _data[index] : null;
-		
+		/// <param name="index">The data index to grab</param>
+		/// <returns>Values casted as ints</returns>
+		public int[] Copy(int index) => _data?.Length > index ? _data[index].Select(x => (int)x).ToArray() : null;
+
 		/// <summary>
 		/// Get the size of the pixel container
 		/// </summary>
