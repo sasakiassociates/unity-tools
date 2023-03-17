@@ -23,8 +23,8 @@ namespace Sasaki.Unity
 		Coroutine _finderRoutine;
 
 		PixelFinder _finder;
-		PixelFinderCube _layout;
-		PixelFinderSystem _system;
+		PixelLayoutCube _layout;
+		PixelSystemBasic _systemBasic;
 
 		List<Color32> _colors;
 
@@ -59,7 +59,7 @@ namespace Sasaki.Unity
 
 		void CreateLayout()
 		{
-			_layout = new GameObject().AddComponent<PixelFinderCube>();
+			_layout = new GameObject().AddComponent<PixelLayoutCube>();
 			// _layout.Init(_colors, );
 
 			var ui = Instantiate(_uiPrefab, _uiContainer.transform);
