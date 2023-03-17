@@ -1,26 +1,49 @@
 ﻿#pragma kernel PixelFinderInitialize
 #pragma kernel PixelFinderMain
+#pragma kernel DebugView
+#pragma kernel DebugViewValues
+#pragma kernel CompileDebugViews
 
-int InputTextureSize;
-int InputTextureHeight;
-Texture2D<float4> InputTexture;
 
-int ColorArraySize;
-Texture2D<float4> ColorArrayTexture;
+/*
+ * read only textures info
+ */
+Texture2D<float4> inputTexture;
+int inputTextureSize;
 
-static const uint maxVal = 16384;
+/*
+ * read only color data 
+ */
+int colorArraySize;
+Texture2D<float4> colorArrayTexture;
+
+/*
+ * Debug params
+ * TODO: move these to a debug
+ */
+RWTexture2D<uint> uintText2D;
+RWTexture2D<float> floatText2D;
+RWTexture2D<float4> debugTexture;
+RWStructuredBuffer<uint2> debugUint2Buffer;
+RWStructuredBuffer<float2> debugFloat2Buffer;
+RWStructuredBuffer<uint> debugUintBuffer;
+RWStructuredBuffer<float> debugFloatBuffer;
+int colorBufferCount;
+StructuredBuffer<float4> debugColorBuffer;
+
+static const uint MAX_VALUE = 16384;
 
 struct pixelStruct
 {
     uint count;
 };
 
-RWStructuredBuffer<pixelStruct> PixelCountBuffer;
+RWStructuredBuffer<pixelStruct> pixelCountBuffer;
 
 [numthreads(64,1,1)]
 void PixelFinderInitialize(uint3 id : SV_DispatchThreadID)
 {
-    PixelCountBuffer[id.x].count = 0;
+    pixelCountBuffer[id.x].count = 0;
 }
 
 bool colorMatch(float4 c, float4 d)
@@ -29,29 +52,75 @@ bool colorMatch(float4 c, float4 d)
 }
 
 
-float calcFrac(const float pos, const float r)
+float calcFrac(const float coord, const float size)
 {
-    const float px = 1 / (float)InputTextureSize;
-    const float theta = atan2(pos + px, r) - atan2(pos, r);
-    return theta * r / px;
+    const float radius = 0.5;
+    const float px = 1 / size;
+    const float pos = coord / size - radius;
+    const float theta = atan2(pos + px, radius) - atan2(pos, radius);
+    return theta * radius / px;
 }
 
 
 [numthreads(8,8,1)]
 void PixelFinderMain(uint3 id : SV_DispatchThreadID)
 {
-    const float4 currentColor = InputTexture[id.xy];
+    const float4 currentColor = inputTexture[id.xy];
 
-    for (int i = 0; i < ColorArraySize; i++)
+    for (int i = 0; i < colorArraySize; i++)
     {
-        if (colorMatch(currentColor, ColorArrayTexture[uint2(i, 0)]))
+        if (colorMatch(currentColor, colorArrayTexture[uint2(i, 0)]))
         {
-            const float fracX = calcFrac(id.x / (float)InputTextureSize - 0.5, 0.5);
-            const float fracY = calcFrac(id.y / (float)InputTextureSize - 0.5, 0.5);
+            const float textureSize = (float)inputTextureSize;
+            const float fracX = calcFrac(id.x, textureSize);
+            const float fracY = calcFrac(id.y, textureSize);
+            // const float fracY = calcFrac(id.y / textureSize - 0.5, 0.5);
 
-            const uint overall = floor(maxVal * pow(abs(fracX * fracY), sqrt(2)));
+            const uint overall = floor(MAX_VALUE * pow(abs(fracX * fracY), sqrt(2)));
 
-            InterlockedAdd(PixelCountBuffer[i].count, overall);
+            InterlockedAdd(pixelCountBuffer[i].count, overall);
+        }
+    }
+}
+
+[numthreads(8,8,1)]
+void DebugView(uint3 id : SV_DispatchThreadID)
+{
+    const float offset = 0.5;
+
+    const float fracX = calcFrac(id.x / (float)512 - offset, offset);
+    const float fracY = calcFrac(id.y / (float)512 - offset, offset);
+    const float frag = pow(abs(fracX * fracY), sqrt(2));
+    debugTexture[id.xy] = debugColorBuffer[floor(colorBufferCount * frag)];
+}
+
+
+[numthreads(1,1,1)]
+void DebugViewValues(uint3 id : SV_DispatchThreadID)
+{
+    const float offset = 0.5;
+    const float fraction = 512.0 - offset;
+
+    const float fracX = calcFrac(id.x / fraction, offset);
+    const float fracY = calcFrac(id.y / fraction, offset);
+
+    const float frag = pow(abs(fracX * fracY), sqrt(2));
+    const uint overall = floor(MAX_VALUE * frag);
+
+    // debugFloatBuffer[id.x] = frag;
+    floatText2D[id.xy] = frag;
+    uintText2D[id.xy] = overall;
+}
+
+[numthreads(1,1,1)]
+void CompileDebugViews(uint3 id : SV_DispatchThreadID)
+{
+    for (uint x = 0, index = 0; x < 512; x++)
+    {
+        for (uint y = 0; y < 512; y++, index++)
+        {
+            debugFloatBuffer[index] = floatText2D[uint2(x, y)];
+            debugUintBuffer[index] = uintText2D[uint2(x, y)];
         }
     }
 }

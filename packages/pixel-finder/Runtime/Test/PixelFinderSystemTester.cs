@@ -8,7 +8,7 @@ namespace Sasaki.Unity
 
 		[SerializeField] GameObject frontObj, leftObj, rightObj, backObj;
 
-		public PixelFinderLayout layout;
+		public PixelLayout layout;
 
 		Vector3[] points;
 
@@ -44,7 +44,7 @@ namespace Sasaki.Unity
 
 			layout.Init(points.Length, colors);
 
-			layout.onComplete += () => Debug.Log("Reporting back");
+			layout.OnComplete += () => Debug.Log("Reporting back");
 
 			layout.Run(0);
 		}

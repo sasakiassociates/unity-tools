@@ -51,14 +51,14 @@ namespace Sasaki.Unity
 			if (systemType == FinderSystemType.ComputeShader)
 			{
 				foreach (var finder in pixelFinder)
-					if (!finder.isDone)
+					if (!finder.WorkComplete)
 					{
 						Debug.Log($"{finder.name} is not done");
 						return;
 					}
 
 				foreach (var finder in pixelFinder)
-					Debug.Log(finder.data.Copy(0));
+					Debug.Log(finder.PixelData[0]);
 			}
 
 			timer.Stop();
@@ -75,28 +75,28 @@ namespace Sasaki.Unity
 			front.transform.SetParent(parent.transform);
 
 			front.Init(frontObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
-			frontImage.texture = front.texture;
+			frontImage.texture = front.Texture;
 
 			var left = new GameObject("Left-PixelFinder").AddComponent<PixelFinder>();
 			left.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
 			left.transform.SetParent(parent.transform);
 
 			left.Init(leftObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
-			leftImage.texture = left.texture;
+			leftImage.texture = left.Texture;
 
 			var right = new GameObject("Right-PixelFinder").AddComponent<PixelFinder>();
 			right.transform.localRotation = Quaternion.Euler(new Vector3(0, -90, 0));
 			right.transform.SetParent(parent.transform);
 
 			right.Init(rightObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
-			rightImage.texture = right.texture;
+			rightImage.texture = right.Texture;
 
 			var back = new GameObject("Back-PixelFinder").AddComponent<PixelFinder>();
 			back.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
 			back.transform.SetParent(parent.transform);
 
 			back.Init(backObj.GetComponent<MeshRenderer>().material.GetColor(DiffuseColor), Check);
-			backImage.texture = back.texture;
+			backImage.texture = back.Texture;
 
 			pixelFinder = new List<PixelFinder>
 			{
