@@ -31,7 +31,23 @@ RWStructuredBuffer<float> debugFloatBuffer;
 int colorBufferCount;
 StructuredBuffer<float4> debugColorBuffer;
 
-static const uint MAX_VALUE = 16384;
+/*
+ * This value comes from a predetermined max value (uint.MaxValue:4294967295) divided by the total pixels in  a view
+ *
+ * Important! This causes issues when converting the values from uint to int
+ * This might be useful during the gpu world stuff, but the final result of data needs to be standardized
+ * So applications do not need to worry about handling the conversion value.
+ *
+ * This value can be stored in the as the `Raw Uint Data` buffer so there is that access from the app side
+ */
+static const uint MAX_VALUE_FROM_UINT = 16384;
+
+/*
+ * This value comes from a predetermined max value (int.MaxValue:2147483647) divided by the total pixels in  a view
+ * We capture the pixel count in a uint but to standardize the data we have to cast it to a int
+ * The final value comes from : 2147483647/(512*512)
+ */
+static const uint MAX_VALUE_FROM_INT = 8191;
 
 struct pixelStruct
 {
@@ -76,7 +92,7 @@ void PixelFinderMain(uint3 id : SV_DispatchThreadID)
             const float fracY = calcFrac(id.y, textureSize);
             // const float fracY = calcFrac(id.y / textureSize - 0.5, 0.5);
 
-            const uint overall = floor(MAX_VALUE * pow(abs(fracX * fracY), sqrt(2)));
+            const uint overall = floor(MAX_VALUE_FROM_UINT * pow(abs(fracX * fracY), sqrt(2)));
 
             InterlockedAdd(pixelCountBuffer[i].count, overall);
         }
@@ -105,7 +121,7 @@ void DebugViewValues(uint3 id : SV_DispatchThreadID)
     const float fracY = calcFrac(id.y / fraction, offset);
 
     const float frag = pow(abs(fracX * fracY), sqrt(2));
-    const uint overall = floor(MAX_VALUE * frag);
+    const uint overall = floor(MAX_VALUE_FROM_UINT * frag);
 
     // debugFloatBuffer[id.x] = frag;
     floatText2D[id.xy] = frag;

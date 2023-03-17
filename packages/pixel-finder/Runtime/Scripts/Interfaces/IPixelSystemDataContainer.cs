@@ -1,11 +1,15 @@
 ﻿namespace Sasaki.Unity
 {
-	public interface IPixelSystemDataContainer
-	{
-		public string name { get; }
 
-		public string[] layoutNames { get; }
+  public interface IPixelDataContainer
+  {
+    public string Name { get; }
+    public string[] ItemName { get; }
+  }
 
-		public PixelLayoutData[] data { get; }
-	}
+  public interface IPixelSystemDataContainer
+  {
+    public PixelLayoutData[] Data { get; }
+  }
+
 }

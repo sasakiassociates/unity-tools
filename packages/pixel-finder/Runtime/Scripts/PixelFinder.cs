@@ -289,6 +289,7 @@ namespace Sasaki.Unity
     public void PreRender()
     {
       WorkComplete = false;
+      histogramData = new uint[ColorCount];
     }
 
     /// <summary>

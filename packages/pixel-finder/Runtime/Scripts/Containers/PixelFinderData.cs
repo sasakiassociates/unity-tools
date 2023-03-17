@@ -116,20 +116,22 @@ namespace Sasaki.Unity
     /// Gets one dimension of values from the collection
     /// </summary>
     /// <returns></returns>
-    public int[] Get1d(int dimension)
+    public int[] Get1d(int colorIndex)
     {
       var column = new int[_data.Length];
 
       for(int pointIndex = 0; pointIndex < _data.Length; pointIndex++)
       {
-        if(column[pointIndex] >= int.MaxValue)
+        // if(column[pointIndex] >= int.MaxValue)
+        // {
+        //   Debug.LogWarning($"({pointIndex}) is too big for int: {column[pointIndex]}");
+        // }
+        //
+        if(_data[pointIndex] != null && _data[pointIndex].Length > colorIndex)
         {
-          Debug.LogWarning($"({pointIndex}) is too big for int: {column[pointIndex]}");
-        }
-        
-        if(_data[pointIndex] != null && _data[pointIndex].Length > dimension)
-        {
-          column[pointIndex] = (int)_data[pointIndex][dimension];
+          // TODO: Figure out a better way to handle the conversion of uint to int
+          // NOTE: This seems to only happen when the data is combined from the finder to the layout
+          column[pointIndex] = (int)Math.Clamp(_data[pointIndex][colorIndex], 0, int.MaxValue);
         }
       }
 
@@ -189,14 +191,6 @@ namespace Sasaki.Unity
     public void Set(uint[] values, int index = 0)
     {
       _data[index] = values;
-
-      foreach(var v in values)
-      {
-        if(v >= int.MaxValue)
-        {
-          Debug.LogWarning($"({index}) is too big for int: {v}");
-        }
-      }
     }
 
   }

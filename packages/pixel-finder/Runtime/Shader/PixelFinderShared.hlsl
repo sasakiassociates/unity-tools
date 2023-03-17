@@ -1,5 +1,5 @@
 ﻿
-static const uint MAX_VALUE = 16384;
+static const uint MAX_VALUE_FROM_UINT = 16384;
 static const uint TEXTURE_SIZE = 512;
 static const float PIXEL_FRACTION = 1 / (float)TEXTURE_SIZE;
 

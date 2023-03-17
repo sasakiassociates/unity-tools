@@ -9,28 +9,28 @@ namespace Sasaki.Unity
 	{
 		public PixelSystemData(IPixelSystem obj)
 		{
-			name = obj.SystemName;
-			layoutNames = new string[obj.Layouts.Count];
-			data = new PixelLayoutData[obj.Layouts.Count];
+			Name = obj.SystemName;
+			ItemName = new string[obj.Layouts.Count];
+			Data = new PixelLayoutData[obj.Layouts.Count];
 
 			for (var i = 0; i < obj.Layouts.Count; i++)
 			{
-				layoutNames[i] = obj.Layouts[i].LayoutName;
-				data[i] = new PixelLayoutData(obj.Layouts[i]);
+				ItemName[i] = obj.Layouts[i].LayoutName;
+				Data[i] = new PixelLayoutData(obj.Layouts[i]);
 			}
 		}
 	
-		public string name { get; }
+		public string Name { get; }
 	
 		/// <summary>
 		///   Names of different layouts
 		/// </summary>
-		public string[] layoutNames { get; }
+		public string[] ItemName { get; }
 	
 		/// <summary>
 		///   Data from each layout
 		/// </summary>
-		public PixelLayoutData[] data { get; }
+		public PixelLayoutData[] Data { get; }
 	}
 
 }

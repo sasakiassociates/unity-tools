@@ -2,11 +2,17 @@
 {
 	public interface IPixelLayoutDataContainer
 	{
-		public string name { get; }
+		public string Name { get; }
 
-		public string[] finderNames { get; }
+		public string[] FinderNames { get; }
 
-		public PixelDataContainer data { get; }
+		public PixelDataContainer Data { get; }
+		
+	}
 
+	public static class PixelDataExtensions
+	{
+		
+		
 	}
 }
